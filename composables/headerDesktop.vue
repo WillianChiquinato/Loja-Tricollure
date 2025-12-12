@@ -60,7 +60,7 @@
 
         <nav class="hidden lg:block bg-[#B26F2C] border-y border-[#FFF3E5]">
             <ul class="flex justify-center gap-12 py-3">
-                <li><a class="menuItem" href="/">Inicio</a></li>
+                <li><a class="menuItem" href="#inicio">Inicio</a></li>
                 <li><a class="menuItem" href="/">Conjuntos</a></li>
                 <li><a class="menuItem" href="/">Vestidos</a></li>
                 <li><a class="menuItem" href="/">Acessórios</a></li>
@@ -160,6 +160,13 @@ const placeHolderNotifications = [
 </script>
 
 <style scoped lang="scss">
+.headerContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
 .headerNotifications {
     margin: 0.25rem 1rem;
     letter-spacing: 0.05rem;
