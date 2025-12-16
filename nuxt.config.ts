@@ -40,7 +40,7 @@ export default defineNuxtConfig({
       ]
     },
     baseURL: '/Loja-Tricollure/',
-    buildAssetsDir: 'assets',
+    buildAssetsDir: '/_nuxt/'
   },
 
   ssr: false,
