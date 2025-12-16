@@ -39,12 +39,12 @@ export default defineNuxtConfig({
         }
       ]
     },
-    baseURL: '/Loja-Tricollure/', 
+    baseURL: '/Loja-Tricollure/',
     buildAssetsDir: 'assets',
   },
 
   ssr: false,
   nitro: {
-    preset: 'static'
+    preset: 'github-pages'
   }
 })
