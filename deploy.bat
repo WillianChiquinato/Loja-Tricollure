@@ -1,34 +1,40 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
-echo === Verificando branch atual ===
-git rev-parse --abbrev-ref HEAD
+echo === Branch atual ===
+git branch --show-current
 
-echo === Gerando build do Nuxt ===
+echo === Gerando build ===
 npm run generate
 
-echo === Indo para gh-pages ===
-git checkout gh-pages || (
-  echo ERRO: branch gh-pages nao encontrada
+echo === Verificando build ===
+if not exist ".output\public\index.html" (
+  echo ERRO: build nao encontrado em .output/public
+  pause
   exit /b 1
 )
 
-echo === Limpando arquivos antigos ===
-for /f %%i in ('dir /b /a-d') do del %%i
-for /d %%i in (*) do rmdir /s /q %%i
+echo === Indo para gh-pages ===
+git checkout gh-pages || exit /b 1
 
-echo === Copiando novos arquivos ===
-xcopy .output\public\* . /E /Y
+echo === Limpando branch gh-pages ===
+git rm -rf . >nul 2>&1
+
+echo === Copiando arquivos novos ===
+xcopy ".output\public\*" "." /E /H /C /I /Y
+
+echo === Status git ===
+git status
 
 echo === Commitando ===
 git add -A
-git commit -m "Deploy: atualizacao do site" || echo Nada para commitar
+git commit -m "Deploy automatico" || echo Nada para commitar
 
-echo === Enviando para o GitHub ===
+echo === Push ===
 git push origin gh-pages
 
 echo === Voltando para main ===
 git checkout main
 
-echo === Deploy finalizado com sucesso ===
+echo === DEPLOY FINALIZADO ===
 pause
