@@ -61,11 +61,11 @@
         <nav class="hidden lg:block bg-[#B26F2C] border-y border-[#FFF3E5]">
             <ul class="flex justify-center gap-12 py-3">
                 <li><a class="menuItem" href="#inicio">Inicio</a></li>
-                <li><a class="menuItem" href="/">Conjuntos</a></li>
-                <li><a class="menuItem" href="/">Vestidos</a></li>
-                <li><a class="menuItem" href="/">Acessórios</a></li>
-                <li><a class="menuItem" href="/">Solicitações</a></li>
-                <li><a class="menuItem" href="/">Rastreio de pedido</a></li>
+                <li><a class="menuItem" href="#destaques">Destaques</a></li>
+                <li><a class="menuItem" href="#novidades">Novidades</a></li>
+                <li><a class="menuItem" href="#loja">Loja</a></li>
+                <li><a class="menuItem" href="#solicitacoes">Solicitações</a></li>
+                <li><a class="menuItem" href="#rastreio">Rastreio de pedido</a></li>
             </ul>
         </nav>
 
