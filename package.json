@@ -4,11 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt build",
+    "build": "nuxt generate",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "deploy": "gh-pages -d .output/public"
+    "predeploy": "npm run generate",
+    "deploy": "gh-pages -d .output/public --dotfiles"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
