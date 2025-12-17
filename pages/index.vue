@@ -53,6 +53,41 @@
     <div class="flex w-full h-full bg-gray-200 mb-10">
       <img :src="DestaqueImage" alt="Imagem de Destaque" class="w-full h-full object-cover object-center" />
     </div>
+
+    <div id="novidades" class="flex flex-col justify-center items-center novidadesContainer">
+      <h1 class="text-xl font-bold sm:text-2xl mt-6">Fique por dentro das novidades</h1>
+      <p class="text-sm sm:text-base font-medium mt-2">Increva-se para receber todas as novidades e noticias,
+        exclusividadee online e muito mais</p>
+
+      <div class="flex flex-col items-center gap-2">
+        <!-- E-mail -->
+        <div class="w-72 sm:w-96">
+          <label class="block text-xs sm:text-base tracking-widest text-gray-700 mb-2 text-center">
+            E-MAIL
+          </label>
+          <InputText type="email" class="w-full bg-transparent border-0 border-b border-gray-400
+             text-center focus:outline-none focus:ring-0
+             focus:border-gray-700" />
+        </div>
+
+        <!-- Telefone -->
+        <div class="w-72 sm:w-96">
+          <label class="block text-xs sm:text-base tracking-widest text-gray-700 mb-2 text-center">
+            TELEFONE
+          </label>
+          <InputText type="text" class="w-full bg-transparent border-0 border-b border-gray-400
+             text-center focus:outline-none focus:ring-0
+             focus:border-gray-700" />
+        </div>
+
+        <!-- Botão -->
+        <button class="start-shopping-button">
+          Enviar
+        </button>
+      </div>
+    </div>
+
+    <Footer />
   </div>
 </template>
 
@@ -66,6 +101,7 @@ import {
 
 import ProductCard from '@/components/productCard.vue'
 import HeaderDesktop from '~/components/headerDesktop.vue';
+import Footer from '~/components/Footer.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
 
@@ -85,6 +121,7 @@ import ImagemDestaque from '@/assets/Images/ImagemDestaque2.png';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
+import { InputText } from 'primevue';
 
 
 const banners = [Banner1, Banner2, Banner3];
@@ -241,11 +278,11 @@ const DestaqueImage = ImagemDestaque;
 .swiper-pagination-bullet {
   width: 12px;
   height: 12px;
-  background: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(80, 75, 75, 0.684) !important;
   opacity: 1;
   transition: all 0.3s ease;
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(35, 35, 35, 0.3);
 
   @media (max-width: 768px) {
     width: 10px;
@@ -253,13 +290,13 @@ const DestaqueImage = ImagemDestaque;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.8) !important;
+    background: rgba(161, 186, 180, 0.8) !important;
     transform: scale(1.1);
   }
 }
 
 .swiper-pagination-bullet-active {
-  background: rgb(255, 255, 255) !important;
+  background: rgb(161, 186, 180) !important;
   border-color: rgba(0, 0, 0, 0.2);
   transform: scale(1.3);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -352,8 +389,8 @@ const DestaqueImage = ImagemDestaque;
 
 .start-shopping-button {
   display: block;
-  margin: 3rem auto 6rem auto;
-  padding: 0.5rem 2.5rem;
+  margin: 1.7rem auto 6rem auto;
+  padding: 0.5rem 4rem;
   background-color: #F9F9F9;
   color: #8B5E33;
   font-size: 1.25rem;
@@ -368,13 +405,27 @@ const DestaqueImage = ImagemDestaque;
   &:hover {
     background-color: #ffffff;
     color: #885e36;
-    
+
     transform: scale(1.05);
   }
 
   @media (max-width: 640px) {
     font-size: 1rem;
     padding: 0.75rem 1.5rem;
+  }
+}
+
+.novidadesContainer {
+  margin: 7rem 0rem 0rem 0rem;
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    text-align: center;
+    max-width: 600px;
+    margin-bottom: 1.7rem;
   }
 }
 </style>

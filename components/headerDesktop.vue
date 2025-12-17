@@ -112,7 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import logo from "~/assets/images/Logo-Tricollure.png";
 
 import InputText from 'primevue/inputtext';
@@ -120,6 +120,7 @@ import Button from 'primevue/button';
 
 const search = ref("");
 const menuOpen = ref(false);
+const isVisible = ref(false);
 
 const searchButton = () => {
     console.log("Searching for:", search.value);
@@ -157,6 +158,18 @@ const placeHolderNotifications = [
         linkDirect: "/",
     }
 ];
+
+onMounted(() => {
+    const header = document.querySelector('.headerContainer');
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header?.classList.add('animate');
+        } else {
+            header?.classList.remove('animate');
+        }
+    });
+});
 </script>
 
 <style scoped lang="scss">
@@ -164,7 +177,18 @@ const placeHolderNotifications = [
     position: fixed;
     top: 0;
     left: 0;
+    transition: all 0.3s ease-in-out;
     z-index: 1000;
+
+    &.animate {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        transform: translateY(-22%);
+
+        @media (max-width: 768px) {
+            transform: translateY(-20%);
+        }
+    }
 }
 
 .headerNotifications {
