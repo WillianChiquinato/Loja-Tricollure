@@ -4,20 +4,26 @@
 
     <!-- Carrossel dos banners -->
     <div id="inicio" class="relative bannerHomePage">
-      <swiper class="w-full banner-swiper" :modules="[Pagination, Autoplay]" :slides-per-view="1" :pagination="{
-        clickable: true,
-        dynamicBullets: true
-      }" loop :autoplay="{
-        delay: 4000,
-        disableOnInteraction: false,
-        pauseOnMouseEnter: true
-      }" :speed="800" :grabCursor="true">
-        <swiper-slide v-for="(img, index) in banners" :key="index">
+      <swiper v-if="retailList.length > 0" class="w-full banner-swiper" :modules="[Pagination, Autoplay]"
+        :slides-per-view="1" :pagination="{
+          clickable: true,
+          dynamicBullets: true
+        }" loop :autoplay="{
+      delay: 4000,
+      disableOnInteraction: false,
+      pauseOnMouseEnter: true
+    }" :speed="800" :grabCursor="true">
+        <swiper-slide v-for="(item, index) in retailList" :key="item.id ?? index">
           <div class="banner-container">
-            <img :src="img" :alt="`Banner ${index + 1}`" class="banner-image" />
+            <img :src="item.imageURL" :alt="`Banner ${index + 1}`" class="banner-image" />
           </div>
         </swiper-slide>
       </swiper>
+
+      <!-- Banner padrão -->
+      <div v-else class="banner-container">
+        <img src="/images/Banners/BannerTeste2.png" alt="banner padrao" class="banner-image" />
+      </div>
     </div>
 
     <div class="grid place-items-center promotionsHomePage mt-20 gap-10
@@ -92,6 +98,7 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import {
   TruckIcon,
   TagIcon,
@@ -99,15 +106,19 @@ import {
   PhoneIcon
 } from '@heroicons/vue/24/outline';
 
+const { $httpClient } = useNuxtApp();
+const { loadingPush, loadingPop } = useLoading();
+
 import ProductCard from '@/components/productCard.vue'
 import HeaderDesktop from '~/components/headerDesktop.vue';
 import Footer from '~/components/Footer.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
+import useLoading from '~/composable/useLoading';
+import { useNuxtApp } from 'nuxt/app';
 
-import Banner1 from '@/assets/Images/BannerTeste1.png';
-import Banner2 from '@/assets/Images/BannerTeste2.png';
-import Banner3 from '@/assets/Images/BannerTeste3.png';
+import type { IRetail } from '~/infra/interfaces/services/retail';
+
 import Product1 from '@/assets/Images/Product1.png';
 import Product2 from '@/assets/Images/Product2.png';
 import Product3 from '@/assets/Images/Product3.png';
@@ -123,8 +134,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { InputText } from 'primevue';
 
-
-const banners = [Banner1, Banner2, Banner3];
+const retailList = ref<IRetail[]>([]);
 
 const promotionsHomePage = [
   {
@@ -217,6 +227,31 @@ const products = [
 ]
 
 const DestaqueImage = ImagemDestaque;
+
+async function loadRetails() {
+  loadingPush();
+
+  try {
+    const retails = await $httpClient.retail.GetRetails();
+
+    if (!retails || retails.result.length === 0) {
+      retailList.value = [];
+      return;
+    }
+
+    retailList.value = retails.result;
+  } catch (err) {
+    console.warn("Erro ao buscar retails:", err);
+    retailList.value = [];
+  }
+  finally {
+    loadingPop();
+  }
+}
+
+onMounted(() => {
+  loadRetails();
+});
 </script>
 
 <style lang="scss">
@@ -225,7 +260,7 @@ const DestaqueImage = ImagemDestaque;
 }
 
 .bannerHomePage {
-  margin-top: 10rem;
+  margin-top: 9.6rem;
 
   @media (max-width: 1024px) {
     margin-top: 13.5rem;
@@ -237,7 +272,7 @@ const DestaqueImage = ImagemDestaque;
 }
 
 .banner-swiper {
-  height: 70vh;
+  height: 85vh;
 
   @media (max-width: 768px) {
     height: 50vh;
@@ -248,9 +283,16 @@ const DestaqueImage = ImagemDestaque;
   }
 }
 
+.banner-swiper :deep(.swiper-slide) {
+  height: 100%;
+}
+
 .banner-container {
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
 
@@ -276,13 +318,13 @@ const DestaqueImage = ImagemDestaque;
 }
 
 .swiper-pagination-bullet {
-  width: 12px;
-  height: 12px;
-  background: rgba(80, 75, 75, 0.684) !important;
+  width: 15px;
+  height: 15px;
+  background: rgba(32, 32, 32, 0.750) !important;
   opacity: 1;
   transition: all 0.3s ease;
   cursor: pointer;
-  border: 2px solid rgba(35, 35, 35, 0.3);
+  border: 3px solid rgba(35, 35, 35, 0.812);
 
   @media (max-width: 768px) {
     width: 10px;
@@ -297,7 +339,7 @@ const DestaqueImage = ImagemDestaque;
 
 .swiper-pagination-bullet-active {
   background: rgb(161, 186, 180) !important;
-  border-color: rgba(0, 0, 0, 0.2);
+  border-color: rgba(0, 0, 0, 0.6);
   transform: scale(1.3);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 

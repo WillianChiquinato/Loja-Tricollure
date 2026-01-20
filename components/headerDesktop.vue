@@ -22,7 +22,7 @@
         <!-- Área principal -->
         <div class="flex flex-col lg:flex-row items-center justify-between px-4 md:px-8 lg:px-12 headerMainArea">
             <div class="flex items-center gap-3">
-                <img :src="logo" alt="Logo" class="w-24 md:w-30 opacity-80" />
+                <img :src="logo" alt="Logo" class="logoContent" />
 
                 <button @click="toggleMenu" class="lg:hidden text-white hamburgerButton">
                     <i class="pi pi-bars text-2xl"></i>
@@ -367,5 +367,11 @@ onMounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.logoContent {
+    height: 100px;
+    width: auto;
+    object-fit: cover;
 }
 </style>
