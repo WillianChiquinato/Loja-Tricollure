@@ -1,15 +1,37 @@
 
 <template>
   <div>
+    <LoadingScreen v-if="isLoading" class="loading-overlay" />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
   </div>
 </template>
 
+<script setup lang="ts">
+import LoadingScreen from './components/UI/LoadingScreen.vue';
+import { storeLoading } from './infra/store/storeLoading';
+import { storeToRefs } from "pinia";
+
+const { isLoading } = storeToRefs(storeLoading());
+</script>
+
 <style lang="scss">
 html {
   scroll-behavior: smooth;
 }
 
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(26, 18, 3, 0.8);
+  backdrop-filter: blur(13px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
 </style>

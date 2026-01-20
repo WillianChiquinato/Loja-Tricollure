@@ -133,6 +133,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { InputText } from 'primevue';
+import { delay } from '~/composable/useDelay';
 
 const retailList = ref<IRetail[]>([]);
 
