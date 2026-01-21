@@ -1,76 +1,79 @@
 <template>
-    <header class="w-full flex flex-col bg-[#B4824F] shadow-md headerContainer">
-        <div class="bg-[#934303] text-white text-sm font-semibold text-center py-4 headerNotifications">
-            <div class="overflow-hidden whitespace-nowrap promotionsMarquee">
-                <div class="inline-block animate-marquee">
-                    <a v-for="notification in placeHolderNotifications" :key="notification.id"
-                        :href="notification.linkDirect" class="mx-8">
-                        {{ notification.message }} –
-                    </a>
-                </div>
+    <div class="headerWrapper">
+        <header class="w-full flex flex-col bg-[#d6ab64] shadow-md headerContainer">
+            <div class="bg-[#934303] text-white text-sm font-semibold text-center py-4 headerNotifications">
+                <div class="overflow-hidden whitespace-nowrap promotionsMarquee">
+                    <div class="inline-block animate-marquee">
+                        <a v-for="notification in placeHolderNotifications" :key="notification.id"
+                            :href="notification.linkDirect" class="mx-8">
+                            {{ notification.message }} –
+                        </a>
+                    </div>
 
-                <div class="inline-block animate-marquee">
-                    <a v-for="notification in placeHolderNotifications" :key="'copy-' + notification.id"
-                        :href="notification.linkDirect" class="mx-8">
-                        {{ notification.message }} –
-                    </a>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Área principal -->
-        <div class="flex flex-col lg:flex-row items-center justify-between px-4 md:px-8 lg:px-12 headerMainArea">
-            <div class="flex items-center gap-3">
-                <img :src="logo" alt="Logo" class="logoContent" />
-
-                <button @click="toggleMenu" class="lg:hidden text-white hamburgerButton">
-                    <i class="pi pi-bars text-2xl"></i>
-                </button>
-            </div>
-
-            <div class="relative w-full lg:flex-1 flex justify-center lg:mx-1">
-                <div class="relative w-full max-w-2xl">
-                    <InputText v-model="search" placeholder="O que você está procurando?"
-                        class="inputSearch w-full h-12" />
-
-                    <Button class="searchButton" @click="searchButton">
-                        <i class="pi pi-search"></i>
-                    </Button>
-                </div>
-            </div>
-
-            <!-- USUÁRIO E CARRINHO -->
-            <div class="headerUserCart">
-                <div class="flex items-center gap-2">
-                    <i class="pi pi-user text-2xl md:text-3xl"></i>
-                    <div class="leading-tight hidden md:block">
-                        <p class="font-bold text-sm">Olá visitante</p>
-                        <p class="text-xs limitText">Faça seu login ou cadastre-se</p>
+                    <div class="inline-block animate-marquee">
+                        <a v-for="notification in placeHolderNotifications" :key="'copy-' + notification.id"
+                            :href="notification.linkDirect" class="mx-8">
+                            {{ notification.message }} –
+                        </a>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <i class="pi pi-shopping-cart text-2xl md:text-3xl"></i>
-                    <button class="text-xs md:text-sm">Carrinho (0)</button>
+            </div>
+
+            <!-- Área principal -->
+            <div class="flex flex-col lg:flex-row items-center justify-between px-4 md:px-8 lg:px-12 headerMainArea">
+                <div class="flex items-center gap-3">
+                    <img :src="logo" alt="Logo" class="logoContent" />
+
+                    <button @click="toggleMenu" class="lg:hidden text-white hamburgerButton">
+                        <i class="pi pi-bars text-2xl"></i>
+                    </button>
                 </div>
 
+                <div class="relative w-full lg:flex-1 flex justify-center lg:mx-6 mx-2">
+                    <div class="relative w-full max-w-2xl">
+                        <InputText v-model="search" placeholder="O que você está procurando?"
+                            class="inputSearch w-full h-12" />
+
+                        <Button class="searchButton" @click="searchButton">
+                            <i class="pi pi-search"></i>
+                        </Button>
+                    </div>
+                </div>
+
+                <!-- USUÁRIO E CARRINHO -->
+                <div class="headerUserCart">
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-user text-2xl md:text-3xl"></i>
+                        <div class="leading-tight hidden md:block">
+                            <p class="font-bold text-sm">Olá visitante</p>
+                            <p class="text-xs limitText">Faça seu login ou cadastre-se</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-shopping-cart text-2xl md:text-3xl"></i>
+                        <button class="text-xs md:text-sm">Carrinho (0)</button>
+                    </div>
+
+                </div>
             </div>
-        </div>
 
-        <nav class="hidden lg:block bg-[#B26F2C] border-y border-[#FFF3E5]">
-            <ul class="flex justify-center gap-12 py-3">
-                <li><a class="menuItem" href="#inicio">Inicio</a></li>
-                <li><a class="menuItem" href="#destaques">Destaques</a></li>
-                <li><a class="menuItem" href="#novidades">Novidades</a></li>
-                <li><a class="menuItem" href="#loja">Loja</a></li>
-                <li><a class="menuItem" href="#solicitacoes">Solicitações</a></li>
-                <li><a class="menuItem" href="#rastreio">Rastreio de pedido</a></li>
-            </ul>
-        </nav>
+            <nav class="hidden lg:block bg-[#ac7843] border-y border-[#FFF3E5] border-t-0">
+                <ul class="flex justify-center gap-12 py-3">
+                    <li><a class="menuItem" href="#inicio">Inicio</a></li>
+                    <li><a class="menuItem" href="#destaques">Destaques</a></li>
+                    <li><a class="menuItem" href="#novidades">Novidades</a></li>
+                    <li><a class="menuItem" href="#loja">Loja</a></li>
+                    <li><a class="menuItem" href="#solicitacoes">Solicitações</a></li>
+                    <li><a class="menuItem" href="#rastreio">Rastreio de pedido</a></li>
+                </ul>
+            </nav>
+        </header>
 
+        <!-- Menu Mobile (fora do header para evitar bug com transform) -->
         <Transition name="slide">
-            <div v-if="menuOpen" class="fixed inset-0 z-50 lg:hidden">
+            <div v-if="menuOpen" class="fixed inset-0 mobileMenuContainer lg:hidden">
                 <div class="absolute inset-0 bg-black bg-opacity-60" @click="toggleMenu"></div>
 
                 <nav class="absolute left-0 top-0 h-full w-64 bg-[#B4824F] shadow-xl px-4">
@@ -108,7 +111,7 @@
                 </nav>
             </div>
         </Transition>
-    </header>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -163,7 +166,7 @@ onMounted(() => {
     const header = document.querySelector('.headerContainer');
 
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
+        if (window.scrollY > 85) {
             header?.classList.add('animate');
         } else {
             header?.classList.remove('animate');
@@ -173,17 +176,27 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+.headerWrapper {
+    width: 100%;
+    position: relative;
+}
+
 .headerContainer {
     position: fixed;
     top: 0;
     left: 0;
+    width: 100%;
     transition: all 0.3s ease-in-out;
-    z-index: 1000;
+    z-index: 2000;
 
     &.animate {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(10px);
-        transform: translateY(-22%);
+        transform: translateY(-23%);
+
+        @media (max-width: 1024px) {
+            transform: translateY(-19%);
+        }
 
         @media (max-width: 768px) {
             transform: translateY(-20%);
@@ -215,6 +228,10 @@ onMounted(() => {
     }
 
     @media (min-width: 1024px) {
+        padding: 0.2rem 4rem;
+    }
+
+    @media (min-width: 1350px) {
         padding: 0.2rem 6rem;
     }
 }
@@ -226,7 +243,7 @@ onMounted(() => {
     color: white;
 
     @media (max-width: 1024px) {
-        padding: 0.4rem 0rem;
+        padding: 0.4rem 1rem;
     }
 }
 
@@ -354,6 +371,10 @@ onMounted(() => {
     transition: opacity 0.3s ease;
 }
 
+.mobileMenuContainer {
+    z-index: 9999;
+}
+
 .headerMobileDivision {
     display: flex;
     align-items: center;
@@ -373,5 +394,6 @@ onMounted(() => {
     height: 100px;
     width: auto;
     object-fit: cover;
+    scale: 1.4;
 }
 </style>

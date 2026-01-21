@@ -9,10 +9,10 @@
           clickable: true,
           dynamicBullets: true
         }" loop :autoplay="{
-      delay: 4000,
+      delay: 2000,
       disableOnInteraction: false,
       pauseOnMouseEnter: true
-    }" :speed="800" :grabCursor="true">
+    }" :speed="1000" :grabCursor="true">
         <swiper-slide v-for="(item, index) in retailList" :key="item.id ?? index">
           <div class="banner-container">
             <img :src="item.imageURL" :alt="`Banner ${index + 1}`" class="banner-image" />
@@ -22,7 +22,7 @@
 
       <!-- Banner padrão -->
       <div v-else class="banner-container">
-        <img src="/images/Banners/BannerTeste2.png" alt="banner padrao" class="banner-image" />
+        <img src="/images/Banners/BannerInicial.png" alt="banner padrao" class="banner-image" />
       </div>
     </div>
 
@@ -291,6 +291,7 @@ onMounted(() => {
 .banner-container {
   width: 100%;
   height: 100%;
+  max-height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
