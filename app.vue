@@ -1,5 +1,6 @@
 
 <template>
+  <AppToast />
   <div>
     <LoadingScreen v-if="isLoading" class="loading-overlay" />
     <NuxtLayout>
@@ -9,6 +10,7 @@
 </template>
 
 <script setup lang="ts">
+import AppToast from './components/Toast/AppToast.vue';
 import LoadingScreen from './components/UI/LoadingScreen.vue';
 import { storeLoading } from './infra/store/storeLoading';
 import { storeToRefs } from "pinia";

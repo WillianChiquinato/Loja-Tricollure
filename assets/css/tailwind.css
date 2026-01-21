@@ -15,5 +15,13 @@
 
 body {
   font-family: 'Jost', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background-color: #FFF7EF;
+  background-color: var(--background-color);
+}
+
+:root {
+  --primary-color: #d6ab64;
+  --secondary-color: #ac7843;
+  --background-color: #FFF7EF;
+  --text-color: #8f6336;
+  --modal-background-color: #E1D9D0;
 }

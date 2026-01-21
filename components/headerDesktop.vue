@@ -1,6 +1,6 @@
 <template>
     <div class="headerWrapper">
-        <header class="w-full flex flex-col bg-[#d6ab64] shadow-md headerContainer">
+        <header class="w-full flex flex-col bg-[var(--primary-color)] shadow-md headerContainer">
             <div class="bg-[#934303] text-white text-sm font-semibold text-center py-4 headerNotifications">
                 <div class="overflow-hidden whitespace-nowrap promotionsMarquee">
                     <div class="inline-block animate-marquee">
@@ -45,9 +45,10 @@
                 <div class="headerUserCart">
                     <div class="flex items-center gap-2">
                         <i class="pi pi-user text-2xl md:text-3xl"></i>
-                        <div class="leading-tight hidden md:block">
-                            <p class="font-bold text-sm">Olá visitante</p>
-                            <p class="text-xs limitText">Faça seu login ou cadastre-se</p>
+                        <div class="leading-tight md:block">
+                            <p class="font-bold text-sm md:text-md hidden md:block">Olá visitante</p>
+                            <button class="text-xs md:text-sm limitText" v-on:click="loginModalActive">Faça seu login ou
+                                cadastre-se</button>
                         </div>
                     </div>
 
@@ -59,7 +60,7 @@
                 </div>
             </div>
 
-            <nav class="hidden lg:block bg-[#ac7843] border-y border-[#FFF3E5] border-t-0">
+            <nav class="hidden lg:block bg-[var(--secondary-color)] border-y border-[#FFF3E5] border-t-0">
                 <ul class="flex justify-center gap-12 py-3">
                     <li><a class="menuItem" href="#inicio">Inicio</a></li>
                     <li><a class="menuItem" href="#destaques">Destaques</a></li>
@@ -111,19 +112,103 @@
                 </nav>
             </div>
         </Transition>
+
+        <LoginModal v-model:visible="loginModal" title="Ja tem conta?">
+            <div class="flex flex-col gap-6 items-center justify-center p-6 !mx-4 !my-7">
+                <div class="relative w-full max-w-sm flex items-center gap-3 border-b border-gray-400 pb-2">
+                    <component :is="EnvelopeIcon"
+                        class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0 md:w-10 md:h-10" />
+
+                    <input type="email" v-model="email" placeholder="Email" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+         focus:outline-none focus:placeholder-transparent transition-all py-2" />
+                </div>
+
+                <div class="relative w-full max-w-sm flex items-center gap-3 border-b border-gray-400 pb-2">
+                    <component :is="LockClosedIcon"
+                        class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0 md:w-10 md:h-10" />
+
+                    <input :type="openPassword ? 'text' : 'password'" v-model="password" placeholder="Senha" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+         focus:outline-none focus:placeholder-transparent transition-all py-2" />
+
+                    <button type="button" @click="togglePasswordVisibility"
+                        class="absolute right-0 top-1/2 -translate-y-1/2 p-1 hover:opacity-70 hover:scale-95 transition">
+                        <component v-if="openPassword" :is="EyeIcon" class="w-5 h-5 stroke-[1.5] text-black" />
+                        <component v-else :is="EyeSlashIcon" class="w-5 h-5 stroke-[1.5] text-black" />
+                    </button>
+                </div>
+
+                <div class="w-full flex justify-center">
+                    <Button class="w-[70%] sm:w-[30%] max-w-sm bg-[var(--secondary-color)] text-white font-bold rounded-md !px-6 !py-1
+                    hover:bg-[var(--primary-color)] hover:scale-105 transition" @click="LoadUserData">
+                        <component :is="ArrowRightEndOnRectangleIcon"
+                            class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                        <span class="text-md md:text-2xl sm:text-xl">Entrar</span>
+                    </Button>
+                </div>
+
+                <div class="w-full flex flex-col gap-1 justify-center">
+                    <span class="text-black font-bold text-sm text-center sm:text-base">Não tem uma conta? Cadastre-se
+                        já</span>
+                    <div class="flex justify-center">
+                        <Button class="w-[80%] sm:w-[40%] max-w-sm bg-[var(--background-color)] text-[var(--secondary-color)] font-bold rounded-md !px-6 !py-1 hover:!bg-[var(--secondary-color)] 
+                        hover:!text-white hover:scale-105 transition">
+                            <component :is="UserPlusIcon" class="w-7 h-7 stroke-[1.5] text-black group-hover:text-white transition" />
+
+                            <span class="text-md md:text-2xl sm:text-xl">Cadastre-se</span>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </LoginModal>
     </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import logo from "~/assets/images/Logo-Tricollure.png";
+import LoginModal from "~/components/Modal/LoginModal.vue";
+import {
+    EnvelopeIcon,
+    LockClosedIcon,
+    EyeIcon,
+    EyeSlashIcon,
+    ArrowRightEndOnRectangleIcon,
+    UserPlusIcon
+} from '@heroicons/vue/24/outline';
 
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import { useToastService } from "~/composable/useToast";
+import { useNuxtApp } from "#app";
+import useLoading from "~/composable/useLoading";
+import { delay } from "~/composable/useDelay";
+
+//Variables
+const { $httpClient } = useNuxtApp();
+const { loadingPush, loadingPop } = useLoading();
+const toast = useToastService();
 
 const search = ref("");
 const menuOpen = ref(false);
 const isVisible = ref(false);
+
+//Email and password text.
+const email = ref("");
+const password = ref("");
+
+//Password
+const openPassword = ref(false);
+const togglePasswordVisibility = () => {
+    openPassword.value = !openPassword.value;
+};
+
+//Login Modal
+const loginModal = ref(false);
+const loginModalActive = () => {
+    loginModal.value = true;
+    console.log("Login modal activated");
+};
 
 const searchButton = () => {
     console.log("Searching for:", search.value);
@@ -162,6 +247,43 @@ const placeHolderNotifications = [
     }
 ];
 
+async function LoadUserData() {
+    if (!email.value || !password.value) {
+        toast.error("Ops", "Por favor, insira seu email e senha.", 4000);
+        return;
+    }
+
+    loadingPush();
+
+    try {
+        await delay(2000);
+
+        const loadUser = await $httpClient.user.GetUser(
+            email.value,
+            password.value
+        );
+
+        if (!loadUser || loadUser.result.length === 0) {
+            toast.error("Não Encontrado", "Usuário não encontrado. Verifique suas credenciais.", 4000);
+            return;
+        }
+
+        toast.success("Bem-vindo de volta!", "Login realizado com sucesso.", 3000);
+        email.value = "";
+        password.value = "";
+
+        loginModal.value = false;
+    }
+    catch (error) {
+        toast.error("Erro", "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.", 4000);
+        loginModal.value = false;
+        console.error("Login error:", error);
+    }
+    finally {
+        loadingPop();
+    }
+}
+
 onMounted(() => {
     const header = document.querySelector('.headerContainer');
 
@@ -179,6 +301,7 @@ onMounted(() => {
 .headerWrapper {
     width: 100%;
     position: relative;
+    z-index: 2000;
 }
 
 .headerContainer {
@@ -187,7 +310,6 @@ onMounted(() => {
     left: 0;
     width: 100%;
     transition: all 0.3s ease-in-out;
-    z-index: 2000;
 
     &.animate {
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -244,6 +366,12 @@ onMounted(() => {
 
     @media (max-width: 1024px) {
         padding: 0.4rem 1rem;
+        gap: 1rem;
+    }
+
+    @media (max-width: 400px) {
+        padding: 0.4rem 1rem;
+        gap: 0.5rem;
     }
 }
 
@@ -388,12 +516,13 @@ onMounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-decoration: none;
 }
 
 .logoContent {
     height: 100px;
     width: auto;
     object-fit: cover;
-    scale: 1.4;
+    scale: 1.6;
 }
 </style>

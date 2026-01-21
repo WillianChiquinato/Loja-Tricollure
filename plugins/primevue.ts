@@ -1,9 +1,13 @@
-import { defineNuxtPlugin } from '#app'
-import PrimeVue from 'primevue/config'
-import Lara from '@primevue/themes/lara';
-import 'primeicons/primeicons.css';
+import { defineNuxtPlugin } from "#app";
+import PrimeVue from "primevue/config";
+import ToastService from "primevue/toastservice";
+import Lara from "@primevue/themes/lara";
+import "primeicons/primeicons.css";
 
-import InputText from 'primevue/inputtext';
+import InputText from "primevue/inputtext";
+import Button from "primevue/button";
+import Dialog from "primevue/dialog";
+import Toast from "primevue/toast";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, {
@@ -12,13 +16,20 @@ export default defineNuxtPlugin((nuxtApp) => {
       options: {
         darkModeSelector: false,
         cssLayer: {
-          name: 'primevue',
-          order: 'tailwind-base, primevue, tailwind-utilities'
-        }
-      }
+          name: "primevue",
+          order: "tailwind-base, primevue, tailwind-utilities",
+        },
+      },
     },
-    unstyled: false
-  })
+    unstyled: false,
+    zIndex: {
+      modal: 3000,
+    },
+  });
 
-  nuxtApp.vueApp.component('InputText', InputText)
+  nuxtApp.vueApp.use(ToastService);
+
+  nuxtApp.vueApp.component("InputText", InputText);
+  nuxtApp.vueApp.component("Button", Button);
+  nuxtApp.vueApp.component("Dialog", Dialog);
 });
