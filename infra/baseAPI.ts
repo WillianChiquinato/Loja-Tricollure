@@ -1,13 +1,26 @@
+import { navigateTo } from "#app";
 import { $fetch } from "ofetch";
+import { clearAuth, verifyToken } from "~/composable/useAuth";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+function getToken() {
+  return localStorage.getItem("token");
+}
 
 export const fetchInstance = $fetch.create({
   baseURL,
 
   onRequest({ options }) {
     const headers = new Headers(options.headers);
+
     headers.set("Content-Type", "application/json");
+
+    const token = getToken();
+    if (token && verifyToken()) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
     options.headers = headers;
   },
 
@@ -16,6 +29,12 @@ export const fetchInstance = $fetch.create({
   },
 
   onResponseError({ response }) {
+    if (response.status === 401) {
+      clearAuth();
+
+      navigateTo("/");
+    }
+
     console.error("API Error:", response);
     throw response._data ?? response;
   },

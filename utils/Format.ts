@@ -41,3 +41,41 @@ export const formatSemJuros = (price: number, installments: number): string => {
   const installmentValue = price / installments;
   return `${installments}x de ${formatCurrency(installmentValue)} sem juros`;
 };
+
+export const cleanCpfCnpj = (value: string | null | undefined): string | null => {
+  if (!value) return null;
+  return value.replace(/\D/g, "");
+};
+
+export const formatCpfCnpj = (value: string): string => {
+  const cleanedValue = value.replace(/\D/g, "");
+  if (cleanedValue.length <= 11) {
+    return cleanedValue.replace(
+      /(\d{3})(\d{3})(\d{3})(\d{2})/,
+      "$1.$2.$3-$4"
+    );
+  } else {
+    return cleanedValue.replace(
+      /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,
+      "$1.$2.$3/$4-$5"
+    );
+  }
+};
+
+export const cleanPhoneNumber = (value: string | null | undefined): string | null => {
+  if (!value) return null;
+
+  const cleaned = value.replace(/\D/g, "");
+  return cleaned ? cleaned : null;
+};
+
+export const formatPhoneNumber = (value: string): string => {
+  const cleanedValue = value.replace(/\D/g, "");
+  if (cleanedValue.length === 10) {
+    return cleanedValue.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+  } else if (cleanedValue.length === 11) {
+    return cleanedValue.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  } else {
+    return value;
+  }
+};

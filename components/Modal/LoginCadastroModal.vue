@@ -27,6 +27,7 @@ const props = defineProps({
 .modalContent {
     width: 80vw;
     max-width: 600px;
+    max-height: 85vh;
     background-color: var(--modal-background-color);
     border-radius: 12px;
     border: solid 0.7px black;

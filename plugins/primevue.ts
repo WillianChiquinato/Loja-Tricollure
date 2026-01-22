@@ -8,6 +8,7 @@ import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import Toast from "primevue/toast";
+import { InputMask } from "primevue";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(PrimeVue, {
@@ -32,4 +33,5 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component("InputText", InputText);
   nuxtApp.vueApp.component("Button", Button);
   nuxtApp.vueApp.component("Dialog", Dialog);
+  nuxtApp.vueApp.component("InputMask", InputMask);
 });

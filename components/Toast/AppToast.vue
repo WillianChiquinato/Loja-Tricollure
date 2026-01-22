@@ -1,5 +1,5 @@
 <template>
-  <Toast position="top-right" :pt="{
+  <Toast :position="isMobile ? 'top-center' : 'top-right'" :pt="{
     root: { class: 'toast-container' },
     message: { class: 'toast-message-wrapper' },
     closeButton: { style: 'display: none' }
@@ -15,11 +15,7 @@
           <p class="toast-message">{{ slotProps.message.detail }}</p>
         </div>
 
-        <button 
-          @click="() => toast.remove(slotProps.message)" 
-          class="toast-close-btn"
-          aria-label="Fechar"
-        >
+        <button @click="() => toast.remove(slotProps.message)" class="toast-close-btn" aria-label="Fechar">
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -28,10 +24,15 @@
 </template>
 
 <script setup lang="ts">
+import { computed, watch } from 'vue'
+
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 
 const toast = useToast()
+const isMobile = computed(() => {
+  return window.innerWidth <= 640
+})
 
 const iconMap: Record<string, string> = {
   success: 'pi pi-check-circle',
@@ -41,7 +42,7 @@ const iconMap: Record<string, string> = {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .app-toast {
   display: flex;
   gap: 16px;
@@ -49,11 +50,11 @@ const iconMap: Record<string, string> = {
   padding: 10px 20px;
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
-  min-width: 390px;
-  max-width: 600px;
+  width: 100%;
+  max-width: 420px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15),
-              0 4px 12px rgba(0, 0, 0, 0.08),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   animation: toastSlideIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
   backdrop-filter: blur(20px);
@@ -87,6 +88,7 @@ const iconMap: Record<string, string> = {
     transform: translateX(120%) scale(0.8);
     opacity: 0;
   }
+
   to {
     transform: translateX(0) scale(1);
     opacity: 1;
@@ -94,10 +96,13 @@ const iconMap: Record<string, string> = {
 }
 
 @keyframes shimmer {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotate(0deg) translate(0, 0);
     opacity: 0;
   }
+
   50% {
     opacity: 0.3;
   }
@@ -133,7 +138,7 @@ const iconMap: Record<string, string> = {
   border-radius: 12px;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1),
-              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -158,9 +163,11 @@ const iconMap: Record<string, string> = {
     transform: scale(0) rotate(-180deg);
     opacity: 0;
   }
+
   50% {
     transform: scale(1.2) rotate(10deg);
   }
+
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
@@ -242,5 +249,43 @@ const iconMap: Record<string, string> = {
 :deep(.p-toast-message-icon),
 :deep(.p-toast-message-text) {
   display: none !important;
+}
+
+@media (max-width: 640px) {
+  :deep(.p-toast-top-right) {
+    right: 0 !important;
+    left: 0 !important;
+    top: 12px;
+    width: 100%;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+
+  :deep(.p-toast-top-center)
+  {
+    right: 0 !important;
+    left: 0 !important;
+    top: 12px;
+    width: 100%;
+    padding: 0 0.7rem;
+    margin: auto 1rem;
+    box-sizing: border-box;
+  }
+
+  .app-toast {
+    max-width: 100%;
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      transform: translateY(-20px) scale(0.95);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
 }
 </style>

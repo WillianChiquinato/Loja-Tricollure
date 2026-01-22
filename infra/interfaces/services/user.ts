@@ -1,24 +1,25 @@
 import type { $Fetch, FetchOptions, FetchResponse } from "ofetch";
 import ClientService from "~/infra/clientService";
 import type { ApiResponse } from "~/infra/response/apiResponse";
+import type { LoginResponse } from "../loginReponse";
 
 export interface IUser {
   id: number;
-  is_active: boolean;
-  cpf_cnpj: string;
-  document_type: number;
-  user_name: string;
+  isActive: boolean;
+  cpfCnpj: string | null;
+  documentType: number;
+  userName: string;
   name: string;
   email: string;
   phoneDDD: number;
-  primary_phone: number;
+  primaryPhone: string | null;
   password: string;
   sex: string;
-  date_of_birth: Date;
-  first_access: Date;
-  last_access: Date;
-  created_at: Date;
-  updated_at: Date;
+  dateOfBirth: Date;
+  firstAcess: Date;
+  lastAccess: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export default class UserService extends ClientService<any> {
@@ -26,19 +27,48 @@ export default class UserService extends ClientService<any> {
     super("User", "api/User");
   }
 
-  GetUser = async (
+  Login = async (
     email: string,
     password: string,
     config: FetchOptions = {},
+  ): Promise<LoginResponse> => {
+    return (await this.fetchInstance(`${this.address}/login`, {
+      method: "POST",
+      body: { email, password },
+      ...config,
+    })) as LoginResponse;
+  };
+
+  GetUsers = async (
+    config: FetchOptions = {},
   ): Promise<ApiResponse<IUser[]>> => {
-    let urlParams = `/GetUsers?email=${email}&password=${password}`;
-    
-    return await this.fetchInstance(
-      `${this.address}${urlParams}`,
-      {
-        method: "GET",
-        ...config,
-      },
-    ) as ApiResponse<IUser[]>;
+    let urlParams = `/GetUsers`;
+
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: "GET",
+      ...config,
+    })) as ApiResponse<IUser[]>;
+  };
+
+  CreateUser = async (
+    userData: IUser,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IUser>> => {
+    return (await this.fetchInstance(`${this.address}/CreateUser`, {
+      method: "POST",
+      body: userData,
+      ...config,
+    })) as ApiResponse<IUser>;
+  };
+
+  FirstAccess = async (
+    userId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IUser>> => {
+    let urlParams = `/FirstAcessUser?userId=${userId}`;
+    return (await this.fetchInstance(`${this.address}${urlParams}`, {
+      method: "PUT",
+      ...config,
+    })) as ApiResponse<IUser>;
   };
 }

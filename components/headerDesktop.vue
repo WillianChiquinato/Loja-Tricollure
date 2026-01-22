@@ -43,18 +43,41 @@
 
                 <!-- USUÁRIO E CARRINHO -->
                 <div class="headerUserCart">
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-user text-2xl md:text-3xl"></i>
-                        <div class="leading-tight md:block">
-                            <p class="font-bold text-sm md:text-md hidden md:block">Olá visitante</p>
-                            <button class="text-xs md:text-sm limitText" v-on:click="loginModalActive">Faça seu login ou
-                                cadastre-se</button>
+                    <div class="userSection">
+                        <div class="userIconWrapper">
+                            <i v-if="verifyToken()" class="pi pi-user"></i>
+                            <i v-else class="pi pi-user-plus"></i>
+                        </div>
+                        
+                        <!-- LOGADO -->
+                        <div v-if="verifyToken()" class="userInfo">
+                            <p class="userName">
+                                Olá, {{ getLoggedUser()?.userName?.split(' ')[0] || 'Usuário' }}
+                            </p>
+                            <button class="userButton logoutButton" @click="logout">
+                                <i class="pi pi-sign-out"></i>
+                                Sair
+                            </button>
+                        </div>
+
+                        <!-- NÃO LOGADO -->
+                        <div v-else class="userInfo">
+                            <p class="userName">
+                                Olá, visitante
+                            </p>
+                            <button class="userButton loginButton" @click="loginModalActive">
+                                <i class="pi pi-sign-in"></i>
+                                Entre ou cadastre-se
+                            </button>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-shopping-cart text-2xl md:text-3xl"></i>
-                        <button class="text-xs md:text-sm">Carrinho (0)</button>
+                    <div class="cartSection">
+                        <div class="cartIconWrapper">
+                            <i class="pi pi-shopping-cart"></i>
+                            <span class="cartBadge">0</span>
+                        </div>
+                        <button class="cartButton">Carrinho</button>
                     </div>
 
                 </div>
@@ -113,21 +136,26 @@
             </div>
         </Transition>
 
-        <LoginModal v-model:visible="loginModal" title="Ja tem conta?">
-            <div class="flex flex-col gap-6 items-center justify-center p-6 !mx-4 !my-7">
-                <div class="relative w-full max-w-sm flex items-center gap-3 border-b border-gray-400 pb-2">
-                    <component :is="EnvelopeIcon"
-                        class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0 md:w-10 md:h-10" />
+        <LoginCadastroModal v-model:visible="loginModal" :title="titleModal">
+            <div v-if="isLoginModal" class="flex flex-col gap-6 items-center justify-center p-6 !mx-4 !my-7">
+                <div class="relative w-full max-w-sm flex items-center gap-3 border-b pb-2 transition"
+                    :class="IsEmailLoginInvalid ? 'border-red-500' : 'border-gray-400'">
+                    <component :is="EnvelopeIcon" class="w-7 h-7 stroke-[1.5] flex-shrink-0 md:w-10 md:h-10"
+                        :class="IsEmailLoginInvalid ? 'text-red-500' : 'text-black'" />
 
-                    <input type="email" v-model="email" placeholder="Email" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
-         focus:outline-none focus:placeholder-transparent transition-all py-2" />
+                    <InputText v-model.trim="emailLogin" type="email" placeholder="Email" class="w-full bg-transparent border-0 text-gray-700 text-sm md:text-xl sm:text-lg
+    focus:outline-none focus:placeholder-transparent transition-all py-2" />
                 </div>
+
+                <span v-if="IsEmailLoginInvalid" class="text-xs text-red-500 mt-1">
+                    Email inválido
+                </span>
 
                 <div class="relative w-full max-w-sm flex items-center gap-3 border-b border-gray-400 pb-2">
                     <component :is="LockClosedIcon"
                         class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0 md:w-10 md:h-10" />
 
-                    <input :type="openPassword ? 'text' : 'password'" v-model="password" placeholder="Senha" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+                    <input :type="openPassword ? 'text' : 'password'" v-model="passwordLogin" placeholder="Senha" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
          focus:outline-none focus:placeholder-transparent transition-all py-2" />
 
                     <button type="button" @click="togglePasswordVisibility"
@@ -148,41 +176,164 @@
                 </div>
 
                 <div class="w-full flex flex-col gap-1 justify-center">
-                    <span class="text-black font-bold text-sm text-center sm:text-base">Não tem uma conta? Cadastre-se
+                    <span class="text-black font-bold text-sm text-center sm:text-base">Não tem uma conta?
+                        Cadastre-se
                         já</span>
                     <div class="flex justify-center">
                         <Button class="w-[80%] sm:w-[40%] max-w-sm bg-[var(--background-color)] text-[var(--secondary-color)] font-bold rounded-md !px-6 !py-1 hover:!bg-[var(--secondary-color)] 
-                        hover:!text-white hover:scale-105 transition">
-                            <component :is="UserPlusIcon" class="w-7 h-7 stroke-[1.5] text-black group-hover:text-white transition" />
+                        hover:!text-white hover:scale-105 transition" @click="sigOnModalActive">
+                            <component :is="UserPlusIcon"
+                                class="w-7 h-7 stroke-[1.5] text-black group-hover:text-white transition" />
 
                             <span class="text-md md:text-2xl sm:text-xl">Cadastre-se</span>
                         </Button>
                     </div>
                 </div>
             </div>
-        </LoginModal>
+
+            <div v-else class="flex flex-col gap-6 items-center justify-center p-6 !mx-4 !my-7">
+                <div class="relative w-full max-w-lg flex items-center gap-3 border-b border-gray-400 pb-2">
+                    <component :is="UserIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                    <input type="text" v-model="userRegister.userName" placeholder="Usuário" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+         focus:outline-none focus:placeholder-transparent transition-all py-2" />
+                </div>
+
+                <div class="relative w-full max-w-lg flex items-center gap-3 border-b border-gray-400 pb-2">
+                    <component :is="UserGroupIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                    <input type="text" v-model="userRegister.name" placeholder="Nome Completo" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+         focus:outline-none focus:placeholder-transparent transition-all py-2" />
+                </div>
+
+                <div class="relative w-full max-w-lg flex items-center gap-3 border-b border-gray-400 pb-2">
+                    <component :is="DocumentIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                    <InputMask mask="999.999.999-99" type="text" v-model="userRegister.cpfCnpj" placeholder="CPF" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+         focus:outline-none focus:placeholder-transparent transition-all py-2" />
+                </div>
+
+                <div class="relative w-full max-w-lg flex items-center gap-3 border-b pb-2 transition"
+                    :class="isEmailInvalid ? 'border-red-500' : 'border-gray-400'">
+                    <component :is="EnvelopeIcon" class="w-7 h-7 stroke-[1.5] flex-shrink-0"
+                        :class="isEmailInvalid ? 'text-red-500' : 'text-black'" />
+
+                    <InputText v-model.trim="userRegister.email" type="email" placeholder="Email" class="w-full bg-transparent border-0 text-gray-700 text-sm md:text-xl sm:text-lg
+    focus:outline-none focus:placeholder-transparent transition-all py-2" />
+                </div>
+
+                <span v-if="isEmailInvalid" class="text-xs text-red-500 mt-1">
+                    Email inválido
+                </span>
+
+                <div class="relative w-full max-w-lg flex items-center gap-3 border-b border-gray-400 pb-2">
+                    <component :is="PhoneIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                    <InputMask mask="(99) 99999-9999" type="text" v-model="userRegister.primaryPhone"
+                        placeholder="Telefone + DDD" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+         focus:outline-none focus:placeholder-transparent transition-all py-2" />
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 md:gap-8 w-full max-w-lg">
+                    <!-- Data -->
+                    <div class="relative w-full flex items-center gap-5 md:gap-3 border-b border-gray-400 pb-2">
+                        <component :is="CalendarDateRangeIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                        <input type="date" v-model="userRegister.dateOfBirth" placeholder="Data de Nascimento" class="w-full bg-transparent border-0 text-gray-700 text-sm sm:text-lg md:text-xl
+            focus:outline-none transition-all py-2" />
+                    </div>
+
+                    <!-- Sexo -->
+                    <div class="relative w-full flex items-center gap-5 md:gap-3 border-b border-gray-400 pb-2">
+                        <component :is="CalendarDateRangeIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                        <select v-model="userRegister.sex" class="w-full bg-transparent border-0 text-gray-700 text-sm sm:text-lg md:text-xl
+            focus:outline-none transition-all py-2">
+                            <option disabled value="">Selecione o sexo</option>
+                            <option value="M">Masculino</option>
+                            <option value="F">Feminino</option>
+                            <option value="O">Outro</option>
+                            <option value="N">Prefiro não informar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 md:gap-8 w-full max-w-lg">
+                    <div class="relative w-full flex items-center gap-5 md:gap-3 border-b border-gray-400 pb-2">
+                        <component :is="LockOpenIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                        <input :type="openPassword ? 'text' : 'password'" v-model="userRegister.password"
+                            placeholder="Senha" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+                        focus:outline-none focus:placeholder-transparent transition-all py-2" />
+
+                        <button type="button" @click="togglePasswordVisibility"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 p-1 hover:opacity-70 hover:scale-95 transition">
+                            <component v-if="openPassword" :is="EyeIcon" class="w-5 h-5 stroke-[1.5] text-black" />
+                            <component v-else :is="EyeSlashIcon" class="w-5 h-5 stroke-[1.5] text-black" />
+                        </button>
+                    </div>
+
+                    <div class="relative w-full flex items-center gap-5 md:gap-3 border-b border-gray-400 pb-2">
+                        <component :is="LockClosedIcon" class="w-7 h-7 stroke-[1.5] text-black flex-shrink-0" />
+
+                        <input :type="confirmedOpenPassword ? 'text' : 'password'" v-model="confirmedPassword"
+                            placeholder="Confirmar Senha" class="w-full bg-transparent border-0 text-gray-700 placeholder-gray-500 text-sm md:text-xl sm:text-lg
+                    focus:outline-none focus:placeholder-transparent transition-all py-2" />
+
+                        <button type="button" @click="toggleConfirmedPasswordVisibility"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 p-1 hover:opacity-70 hover:scale-95 transition">
+                            <component v-if="confirmedOpenPassword" :is="EyeIcon"
+                                class="w-5 h-5 stroke-[1.5] text-black" />
+                            <component v-else :is="EyeSlashIcon" class="w-5 h-5 stroke-[1.5] text-black" />
+                        </button>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col gap-1 justify-center">
+                    <div class="flex justify-center">
+                        <Button class="w-[95%] sm:w-[60%] max-w-lg bg-[var(--secondary-color)] text-[var(--background-color)] font-bold rounded-md !px-6 !py-1 hover:!bg-[var(--primary-color)] 
+                        hover:!text-white hover:scale-105 transition" @click="createUserData">
+                            <component :is="UserPlusIcon"
+                                class="w-7 h-7 stroke-[1.5] text-black group-hover:text-white transition" />
+
+                            <span class="text-md md:text-2xl sm:text-xl">Criar uma conta</span>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </LoginCadastroModal>
     </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import logo from "~/assets/images/Logo-Tricollure.png";
-import LoginModal from "~/components/Modal/LoginModal.vue";
+import LoginCadastroModal from "~/components/Modal/LoginCadastroModal.vue";
 import {
     EnvelopeIcon,
     LockClosedIcon,
+    LockOpenIcon,
     EyeIcon,
     EyeSlashIcon,
     ArrowRightEndOnRectangleIcon,
-    UserPlusIcon
+    UserPlusIcon,
+    UserIcon,
+    UserGroupIcon,
+    DocumentIcon,
+    PhoneIcon,
+    CalendarDateRangeIcon
 } from '@heroicons/vue/24/outline';
 
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import InputMask from 'primevue/inputmask';
 import { useToastService } from "~/composable/useToast";
 import { useNuxtApp } from "#app";
 import useLoading from "~/composable/useLoading";
 import { delay } from "~/composable/useDelay";
+import type { IUser } from "~/infra/interfaces/services/user";
+import { cleanCpfCnpj, cleanPhoneNumber, formatCpfCnpj, formatPhoneNumber } from "~/utils/Format";
+import { clearAuth, getLoggedUser, setLoggedUser, setToken, verifyToken } from "~/composable/useAuth";
 
 //Variables
 const { $httpClient } = useNuxtApp();
@@ -192,22 +343,66 @@ const toast = useToastService();
 const search = ref("");
 const menuOpen = ref(false);
 const isVisible = ref(false);
+const titleModal = ref("");
 
 //Email and password text.
-const email = ref("");
-const password = ref("");
+const emailLogin = ref("");
+const passwordLogin = ref("");
+const confirmedPassword = ref("");
+
+const IsEmailLoginInvalid = computed(() => {
+    if (!emailLogin.value) return false;
+
+    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLogin.value);
+});
+
+const isEmailInvalid = computed(() => {
+    if (!userRegister.value.email) return false;
+
+    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userRegister.value.email);
+});
+
+const userRegister = ref<Partial<IUser>>({
+    userName: "",
+    name: "",
+    cpfCnpj: "",
+    email: "",
+    primaryPhone: null,
+    password: "",
+    sex: "",
+    dateOfBirth: new Date()
+});
 
 //Password
 const openPassword = ref(false);
+const confirmedOpenPassword = ref(false);
 const togglePasswordVisibility = () => {
     openPassword.value = !openPassword.value;
+};
+const toggleConfirmedPasswordVisibility = () => {
+    confirmedOpenPassword.value = !confirmedOpenPassword.value;
 };
 
 //Login Modal
 const loginModal = ref(false);
+const isLoginModal = ref(true);
 const loginModalActive = () => {
     loginModal.value = true;
+    isLoginModal.value = true;
+
+    titleModal.value = "Já tem conta?";
     console.log("Login modal activated");
+};
+
+const sigOnModalActive = () => {
+    loginModal.value = false;
+    setTimeout(() => {
+        loginModal.value = true;
+        isLoginModal.value = false;
+
+        titleModal.value = "Cadastro";
+        console.log("Sign on modal activated");
+    }, 100);
 };
 
 const searchButton = () => {
@@ -218,7 +413,6 @@ const toggleMenu = () => {
     menuOpen.value = !menuOpen.value;
 };
 
-//Vem JSON da API futuramente
 const placeHolderNotifications = [
     {
         id: 1,
@@ -248,7 +442,7 @@ const placeHolderNotifications = [
 ];
 
 async function LoadUserData() {
-    if (!email.value || !password.value) {
+    if (!emailLogin.value || !passwordLogin.value) {
         toast.error("Ops", "Por favor, insira seu email e senha.", 4000);
         return;
     }
@@ -256,22 +450,38 @@ async function LoadUserData() {
     loadingPush();
 
     try {
-        await delay(2000);
-
-        const loadUser = await $httpClient.user.GetUser(
-            email.value,
-            password.value
+        const loadUser = await $httpClient.user.Login(
+            emailLogin.value,
+            passwordLogin.value
         );
 
-        if (!loadUser || loadUser.result.length === 0) {
-            toast.error("Não Encontrado", "Usuário não encontrado. Verifique suas credenciais.", 4000);
+        if (!loadUser || !loadUser.token) {
+            toast.error(
+                "Não Encontrado",
+                "Usuário não encontrado. Verifique suas credenciais.",
+                4000
+            );
             return;
         }
 
-        toast.success("Bem-vindo de volta!", "Login realizado com sucesso.", 3000);
-        email.value = "";
-        password.value = "";
+        setToken(loadUser.token);
+        setLoggedUser(loadUser.user);
 
+        // se ainda quiser manter firstAccess (opcional)
+        if (loadUser.user.firstAcess == null) {
+            await $httpClient.user.FirstAccess(
+                loadUser.user.id
+            );
+        }
+
+        toast.success(
+            "Bem-vindo de volta!",
+            "Login realizado com sucesso.",
+            3000
+        );
+
+        emailLogin.value = "";
+        passwordLogin.value = "";
         loginModal.value = false;
     }
     catch (error) {
@@ -282,6 +492,78 @@ async function LoadUserData() {
     finally {
         loadingPop();
     }
+}
+
+async function createUserData() {
+    if (!userRegister.value.userName || !userRegister.value.name || !userRegister.value.email ||
+        !userRegister.value.primaryPhone || !userRegister.value.password || !confirmedPassword.value) {
+        toast.error("Ops", "Por favor, preencha todos os campos.", 4000);
+        return;
+    }
+
+    if (isEmailInvalid.value) {
+        toast.error("Ops", "Por favor, insira um email válido.", 4000);
+        return;
+    }
+
+    if (userRegister.value.password !== confirmedPassword.value) {
+        toast.error("Ops", "As senhas não coincidem. Verifique e tente novamente.", 4000);
+        return;
+    }
+
+    loadingPush();
+
+    try {
+        userRegister.value.primaryPhone = cleanPhoneNumber(userRegister.value.primaryPhone);
+
+        userRegister.value.cpfCnpj = cleanCpfCnpj(userRegister.value.cpfCnpj || null);
+
+        const createUser = await $httpClient.user.CreateUser(
+            userRegister.value as IUser
+        );
+
+        if (!createUser || !createUser.result) {
+            toast.error("Erro ao Criar Conta", "Não foi possível criar sua conta. Tente novamente.", 4000);
+            return;
+        }
+
+        toast.success("Conta Criada!", "Seu cadastro foi realizado com sucesso.", 3000);
+
+        userRegister.value = {
+            userName: "",
+            name: "",
+            email: "",
+            primaryPhone: null,
+            password: "",
+            sex: "",
+            dateOfBirth: new Date()
+        };
+        confirmedPassword.value = "";
+
+        loginModal.value = false;
+        loginModalActive();
+    }
+    catch (error: any) {
+        if (error?.errors && error.errors.length > 0) {
+            toast.error("Erro", `${error.errors}`, 4000);
+            return;
+        }
+
+        loginModal.value = false;
+        console.error("Create user error:", error);
+    }
+    finally {
+        loadingPop();
+    }
+}
+
+function logout() {
+    clearAuth();
+    toast.success("Logout", "Você saiu da sua conta com sucesso.", 3000);
+
+    setTimeout(() => {
+        location.reload();
+    }, 700);
 }
 
 onMounted(() => {
@@ -524,5 +806,148 @@ onMounted(() => {
     width: auto;
     object-fit: cover;
     scale: 1.6;
+}
+
+/* User Section Styles */
+.userSection,
+.cartSection {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.userSection:hover .userIconWrapper,
+.cartSection:hover .cartIconWrapper {
+    transform: scale(1.1);
+}
+
+.userIconWrapper,
+.cartIconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    
+    i {
+        font-size: 1.25rem;
+        color: white;
+    }
+
+    @media (min-width: 768px) {
+        width: 3rem;
+        height: 3rem;
+
+        i {
+            font-size: 1.5rem;
+        }
+    }
+}
+
+.cartIconWrapper {
+    position: relative;
+}
+
+.cartBadge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background: #e74c3c;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: bold;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--primary-color);
+}
+
+.userInfo {
+    flex-direction: column;
+    gap: 0.15rem;
+
+    @media (min-width: 768px) {
+        display: flex;
+    }
+}
+
+.userName {
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    white-space: nowrap;
+
+    @media (min-width: 1024px) {
+        font-size: 0.95rem;
+    }
+}
+
+.userButton,
+.cartButton {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0;
+    transition: all 0.2s ease;
+    text-align: left;
+
+    i {
+        font-size: 0.75rem;
+    }
+
+    &:hover {
+        color: white;
+        transform: translateX(2px);
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    @media (min-width: 1024px) {
+        font-size: 0.8rem;
+
+        i {
+            font-size: 0.8rem;
+        }
+    }
+}
+
+.logoutButton:hover {
+    color: #ffcccb;
+}
+
+.loginButton:hover {
+    color: #b3e5fc;
+}
+
+.cartButton {
+    display: none;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+
+    @media (min-width: 768px) {
+        display: block;
+    }
+
+    @media (min-width: 1024px) {
+        font-size: 0.875rem;
+    }
 }
 </style>
