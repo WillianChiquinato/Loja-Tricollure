@@ -1,4 +1,6 @@
 <template>
+    <div ref="googleBtn" style="display: none"></div>
+
     <div class="flex justify-center !mt-1 mb-3">
         <button class="google-btn" @click="loginWithGoogle">
             <img src="/Google/LogoGoogle.svg" alt="Google" class="icon" />
@@ -8,33 +10,70 @@
 </template>
 
 <script setup lang="ts">
-import { useRuntimeConfig } from '#app'
-import { onMounted } from 'vue'
+import { useNuxtApp, useRuntimeConfig } from '#app'
+import { onMounted, ref } from 'vue'
+import { setLoggedUser, setToken } from '~/composable/useAuth';
+import useLoading from '~/composable/useLoading';
+import { useToastService } from '~/composable/useToast';
 
+const { loadingPush, loadingPop } = useLoading();
+const { $httpClient } = useNuxtApp();
+const toast = useToastService();
 const config = useRuntimeConfig()
 const clientId = config.public.googleClientId
 
-let googleClient: any
-
-// onMounted(() => {
-//   googleClient = window.google.accounts.id.initialize({
-//     client_id: clientId,
-//     callback: handleGoogleResponse
-//   })
-// })
+const emit = defineEmits(['closeModal'])
 
 const handleGoogleResponse = async (response: any) => {
+    loadingPush();
+        
     const token = response.credential
 
-    await $fetch('https://localhost:5001/api/auth/google', {
-        method: 'POST',
-        body: { token }
-    })
+    try {
+        //Login com google gerado igual o login JWT normal.
+        const data = await $httpClient.user.LoginGoogle(token);
+
+        if (data) {
+            toast.success('Autenticado com sucesso!')
+            setToken(data.token)
+            setLoggedUser(data.user)
+
+            console.log('Usuario autenticado:', data)
+
+            emit('closeModal')
+            loadingPop();
+        }
+    } catch (error) {
+        toast.error('Erro ao autenticar com o Google. Tente novamente mais tarde.')
+        console.error('Erro ao autenticar com o Google:', error);
+        loadingPop();
+    }
 }
 
 const loginWithGoogle = () => {
-    window.google.accounts.id.prompt()
+  const btn = googleBtn.value?.querySelector('div[role=button]') as HTMLElement
+  btn?.click()
 }
+
+const googleBtn = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  if (!window.google || !googleBtn.value) return
+
+  window.google.accounts.id.initialize({
+    client_id: clientId,
+    callback: handleGoogleResponse
+  })
+
+  window.google.accounts.id.renderButton(
+    googleBtn.value,
+    {
+      theme: 'outline',
+      size: 'large',
+      type: 'standard'
+    }
+  )
+})
 </script>
 
 <style scoped>

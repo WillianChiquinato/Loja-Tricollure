@@ -10,12 +10,23 @@
 </template>
 
 <script setup lang="ts">
+import { useHead } from '#app';
 import AppToast from './components/Toast/AppToast.vue';
 import LoadingScreen from './components/UI/LoadingScreen.vue';
 import { storeLoading } from './infra/store/storeLoading';
 import { storeToRefs } from "pinia";
 
 const { isLoading } = storeToRefs(storeLoading());
+
+useHead({
+  script: [
+    {
+      src: 'https://accounts.google.com/gsi/client',
+      async: true,
+      defer: true
+    }
+  ]
+})
 </script>
 
 <style lang="scss">

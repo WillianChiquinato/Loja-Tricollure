@@ -39,6 +39,17 @@ export default class UserService extends ClientService<any> {
     })) as LoginResponse;
   };
 
+  LoginGoogle = async (
+    token: string,
+    config: FetchOptions = {},
+  ): Promise<LoginResponse> => {
+    return (await this.fetchInstance(`${this.address}/LoginGoogle`, {
+      method: "POST",
+      body: { token },
+      ...config,
+    })) as LoginResponse;
+  };
+
   GetUsers = async (
     config: FetchOptions = {},
   ): Promise<ApiResponse<IUser[]>> => {

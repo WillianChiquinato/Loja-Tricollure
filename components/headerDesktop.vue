@@ -136,7 +136,7 @@
             </div>
         </Transition>
 
-        <LoginCadastroModal v-model:visible="loginModal" :title="titleModal">
+        <LoginCadastroModal v-model:visible="loginModal" :title="titleModal" @back="handleBack">
             <div v-if="isLoginModal" class="flex flex-col gap-6 items-center justify-center p-6 !mx-4 !my-7">
                 <div class="relative w-full max-w-sm flex items-center gap-3 border-b pb-2 transition"
                     :class="IsEmailLoginInvalid ? 'border-red-500' : 'border-gray-400'">
@@ -555,6 +555,10 @@ async function createUserData() {
     finally {
         loadingPop();
     }
+}
+
+function handleBack() {
+    loginModal.value = false;
 }
 
 function logout() {

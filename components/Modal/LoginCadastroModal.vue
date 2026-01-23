@@ -2,7 +2,7 @@
     <Dialog v-model:visible="model" appendTo="body" modal class="p-fluid modalContent">
         <h2 class="text-2xl font-bold mb-4 text-center text-black sm:text-3xl">{{ title }}</h2>
 
-        <GoogleLogin />
+        <GoogleLogin @closeModal="handleLoginGoogle" />
 
         <slot></slot>
     </Dialog>
@@ -11,10 +11,12 @@
 <script setup lang="ts">
 import GoogleLogin from '../GoogleLogin.vue';
 
-defineEmits(['back']);
+const emit = defineEmits(['back']);
+const handleLoginGoogle = () => {
+    emit('back');
+}
 
 const model = defineModel('visible', { default: false });
-
 const props = defineProps({
     title : {
         type: String,

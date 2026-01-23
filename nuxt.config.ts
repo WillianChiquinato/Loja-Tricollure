@@ -46,5 +46,11 @@ export default defineNuxtConfig({
   ssr: false,
   nitro: {
     preset: 'github-pages'
+  },
+
+  runtimeConfig: {
+    public: {
+      googleClientId: process.env.GOOGLE_CLIENT_ID || ''
+    }
   }
 })
