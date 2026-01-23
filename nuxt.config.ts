@@ -28,7 +28,7 @@ export default defineNuxtConfig({
     typeCheck: false
   },
 
-  css: ["~/assets/css/tailwind.css"],
+  css: ["~/assets/css/tailwind.css", '@fortawesome/fontawesome-free/css/all.min.css'],
   
   app: {
     head: {
