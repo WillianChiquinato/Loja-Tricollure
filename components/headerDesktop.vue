@@ -139,15 +139,15 @@
         <LoginCadastroModal v-model:visible="loginModal" :title="titleModal" @back="handleBack">
             <div v-if="isLoginModal" class="flex flex-col gap-6 items-center justify-center p-6 !mx-4 !my-7">
                 <div class="relative w-full max-w-sm flex items-center gap-3 border-b pb-2 transition"
-                    :class="IsEmailLoginInvalid ? 'border-red-500' : 'border-gray-400'">
+                    :class="!isEmailValid(emailLogin) && emailLogin ? 'border-red-500' : 'border-gray-400'">
                     <component :is="EnvelopeIcon" class="w-7 h-7 stroke-[1.5] flex-shrink-0 md:w-10 md:h-10"
-                        :class="IsEmailLoginInvalid ? 'text-red-500' : 'text-black'" />
+                        :class="!isEmailValid(emailLogin) && emailLogin ? 'text-red-500' : 'text-black'" />
 
                     <InputText v-model.trim="emailLogin" type="email" placeholder="Email" class="w-full bg-transparent border-0 text-gray-700 text-sm md:text-xl sm:text-lg
     focus:outline-none focus:placeholder-transparent transition-all py-2" />
                 </div>
 
-                <span v-if="IsEmailLoginInvalid" class="text-xs text-red-500 mt-1">
+                <span v-if="!isEmailValid(emailLogin) && emailLogin" class="text-xs text-red-500 mt-1">
                     Email inválido
                 </span>
 
@@ -214,15 +214,15 @@
                 </div>
 
                 <div class="relative w-full max-w-lg flex items-center gap-3 border-b pb-2 transition"
-                    :class="isEmailInvalid ? 'border-red-500' : 'border-gray-400'">
+                    :class="!isEmailValid(userRegister.email!) ? 'border-red-500' : 'border-gray-400'">
                     <component :is="EnvelopeIcon" class="w-7 h-7 stroke-[1.5] flex-shrink-0"
-                        :class="isEmailInvalid ? 'text-red-500' : 'text-black'" />
+                        :class="!isEmailValid(userRegister.email!) ? 'text-red-500' : 'text-black'" />
 
                     <InputText v-model.trim="userRegister.email" type="email" placeholder="Email" class="w-full bg-transparent border-0 text-gray-700 text-sm md:text-xl sm:text-lg
     focus:outline-none focus:placeholder-transparent transition-all py-2" />
                 </div>
 
-                <span v-if="isEmailInvalid" class="text-xs text-red-500 mt-1">
+                <span v-if="!isEmailValid(userRegister.email!)" class="text-xs text-red-500 mt-1">
                     Email inválido
                 </span>
 
@@ -334,6 +334,7 @@ import { delay } from "~/composable/useDelay";
 import type { IUser } from "~/infra/interfaces/services/user";
 import { cleanCpfCnpj, cleanPhoneNumber, formatCpfCnpj, formatPhoneNumber } from "~/utils/Format";
 import { clearAuth, getLoggedUser, setLoggedUser, setToken, verifyToken } from "~/composable/useAuth";
+import { isEmailValid } from "~/utils/Invalids";
 
 //Variables
 const { $httpClient } = useNuxtApp();
@@ -349,18 +350,6 @@ const titleModal = ref("");
 const emailLogin = ref("");
 const passwordLogin = ref("");
 const confirmedPassword = ref("");
-
-const IsEmailLoginInvalid = computed(() => {
-    if (!emailLogin.value) return false;
-
-    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLogin.value);
-});
-
-const isEmailInvalid = computed(() => {
-    if (!userRegister.value.email) return false;
-
-    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userRegister.value.email);
-});
 
 const userRegister = ref<Partial<IUser>>({
     userName: "",
@@ -501,7 +490,7 @@ async function createUserData() {
         return;
     }
 
-    if (isEmailInvalid.value) {
+    if (!isEmailValid(userRegister.value.email)) {
         toast.error("Ops", "Por favor, insira um email válido.", 4000);
         return;
     }

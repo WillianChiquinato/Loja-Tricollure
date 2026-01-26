@@ -1,6 +1,6 @@
 <template>
     <div class="footer-container">
-        <div class="flex gap-16 flex-row justify-center items-center py-6">
+        <div class="flex gap-16 flex-column justify-center items-center py-6">
             <div class="flex gap-2 justify-center items-center py-4 flex-wrap Payment">
                 <p>Meios de pagamento:</p>
                 <img v-for="imagensPayment in sourcePayment" :key="imagensPayment.id" :src="imagensPayment.img" :alt="imagensPayment.alt" class="mx-3 my-2 sourcePayment"/>
@@ -109,9 +109,5 @@ const sourceSend = [
 
 .Payment, .Send {
     margin: 1.5rem 0rem 3rem 0rem;
-
-    @media (max-width: 640px) {
-        flex-direction: column;
-    }
 }
 </style>

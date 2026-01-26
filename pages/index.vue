@@ -9,10 +9,10 @@
           clickable: true,
           dynamicBullets: true
         }" loop :autoplay="{
-      delay: 2000,
-      disableOnInteraction: false,
-      pauseOnMouseEnter: true
-    }" :speed="1000" :grabCursor="true">
+          delay: 2000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true
+        }" :speed="1000" :grabCursor="true">
         <swiper-slide v-for="(item, index) in retailList" :key="item.id ?? index">
           <div class="banner-container">
             <img :src="item.imageURL" :alt="`Banner ${index + 1}`" class="banner-image" />
@@ -57,7 +57,7 @@
     <button class="start-shopping-button">Comece a comprar agora mesmo -></button>
 
     <div class="flex w-full h-full bg-gray-200 mb-10">
-      <img :src="DestaqueImage" alt="Imagem de Destaque" class="w-full h-full object-cover object-center" />
+      <img :src="DestaqueImage?.imageURL" alt="Imagem de Destaque" class="w-full h-full object-cover object-center" />
     </div>
 
     <div id="novidades" class="flex flex-col justify-center items-center novidadesContainer">
@@ -68,26 +68,31 @@
       <div class="flex flex-col items-center gap-2">
         <!-- E-mail -->
         <div class="w-72 sm:w-96">
-          <label class="block text-xs sm:text-base tracking-widest text-gray-700 mb-2 text-center">
-            E-MAIL
+          <label class="block text-xs sm:text-base tracking-widest text-gray-700 mb-2 text-center"
+            :class="!isEmailValid(newsLetter.email!) && newsLetter.email ? 'text-red-500' : 'text-gray-700'">
+            E-MAIL *
           </label>
-          <InputText type="email" class="w-full bg-transparent border-0 border-b border-gray-400
+          <InputText v-model="newsLetter.email" type="email" class="w-full bg-transparent border-0 border-b border-gray-400
              text-center focus:outline-none focus:ring-0
-             focus:border-gray-700" />
+             focus:border-gray-700" :class="!isEmailValid(newsLetter.email!) && newsLetter.email ? 'border-red-500' : 'border-gray-400'" />
+
+          <span v-if="!isEmailValid(newsLetter.email!) && newsLetter.email" class="block text-sm text-red-500 text-center">
+            Email inválido
+          </span>
         </div>
 
         <!-- Telefone -->
         <div class="w-72 sm:w-96">
           <label class="block text-xs sm:text-base tracking-widest text-gray-700 mb-2 text-center">
-            TELEFONE
+            TELEFONE *
           </label>
-          <InputText type="text" class="w-full bg-transparent border-0 border-b border-gray-400
+          <InputMask mask="(99) 99999-9999" type="text" v-model="newsLetter.phoneNumber" class="w-full bg-transparent border-0 border-b border-gray-400
              text-center focus:outline-none focus:ring-0
              focus:border-gray-700" />
         </div>
 
         <!-- Botão -->
-        <button class="start-shopping-button">
+        <button class="start-shopping-button" @click="subscriberNewsLetter(newsLetter)">
           Enviar
         </button>
       </div>
@@ -127,15 +132,26 @@ import Product5 from '@/assets/Images/Product5.png';
 import Product6 from '@/assets/Images/Product6.png';
 import Product7 from '@/assets/Images/Product7.png';
 import Product8 from '@/assets/Images/Product8.png';
-import ImagemDestaque from '@/assets/Images/ImagemDestaque2.png';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { InputText } from 'primevue';
 import { delay } from '~/composable/useDelay';
+import { useToastService } from '~/composable/useToast';
+import { NewsLetterSource, type INewsLetter } from '~/infra/interfaces/services/newsLetter';
+import { isEmailValid, isPhoneNumberValid } from '~/utils/Invalids';
+
+const toast = useToastService();
 
 const retailList = ref<IRetail[]>([]);
+const DestaqueImage = ref<IRetail | null>(null);
+
+const newsLetter = ref<Partial<INewsLetter>>({
+  email: '',
+  phoneNumber: '',
+  source: NewsLetterSource.Website
+});
 
 const promotionsHomePage = [
   {
@@ -227,8 +243,6 @@ const products = [
   },
 ]
 
-const DestaqueImage = ImagemDestaque;
-
 async function loadRetails() {
   loadingPush();
 
@@ -240,10 +254,57 @@ async function loadRetails() {
       return;
     }
 
-    retailList.value = retails.result;
+    const allRetails = retails.result;
+
+    // Pega o destaque
+    const emphasisItem = allRetails.find(r => r.isEmphasis === true);
+    DestaqueImage.value = emphasisItem ?? null;
+
+    // Lista SEM o destaque
+    retailList.value = allRetails.filter(r => r.isEmphasis !== true);
   } catch (err) {
     console.warn("Erro ao buscar retails:", err);
     retailList.value = [];
+  }
+  finally {
+    loadingPop();
+  }
+}
+
+async function subscriberNewsLetter(newsLetter: Partial<INewsLetter>) {
+  loadingPush();
+
+  if (!isEmailValid(newsLetter.email!)) {
+    toast.error("Por favor, insira um e-mail válido.");
+    loadingPop();
+    return;
+  }
+
+  if (!isPhoneNumberValid(newsLetter.phoneNumber!)) {
+    toast.error("Por favor, insira um número de telefone válido.");
+    loadingPop();
+    return;
+  }
+
+  try {
+    const response = await $httpClient.newsLetter.SubscriberNewLetter(
+      newsLetter.email ?? '',
+      newsLetter.phoneNumber ?? '',
+      NewsLetterSource.Website
+    );
+
+    if (!response || !response.result) {
+      toast.error("Erro ao inscrever na newsletter. Tente novamente mais tarde.");
+      loadingPop();
+      return;
+    }
+
+    toast.success("Inscrição na newsletter realizada com sucesso!");
+    newsLetter.email = '';
+    newsLetter.phoneNumber = '';
+  } catch (err) {
+    console.warn("Erro ao inscrever na newsletter:", err);
+    toast.error("Erro ao inscrever na newsletter. Tente novamente mais tarde.");
   }
   finally {
     loadingPop();

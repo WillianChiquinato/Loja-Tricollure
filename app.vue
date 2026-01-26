@@ -1,4 +1,3 @@
-
 <template>
   <AppToast />
   <div>
@@ -9,42 +8,56 @@
   </div>
 
   <transition name="whatsapp-fade">
-    <div v-if="showWhatsapp && !isWhatsappMinimized"  class="whatsapp-container-float">
-      <a :href="`https://wa.me/+5511986652872?text=Olá, quero tirar duvidas sobre a tricollure!!`"
-         target="_blank" class="whatsapp-float">
+    <div v-if="showWhatsapp && !isWhatsappMinimized" class="whatsapp-container-float">
+      <a :href="`https://wa.me/+5511986652872?text=Olá, quero tirar duvidas sobre a tricollure!!`" target="_blank"
+        class="whatsapp-float">
         <i class="fa-brands fa-whatsapp whatsapp-icon"></i>
       </a>
 
-      <button
-          @click="isWhatsappMinimized = true"
-          class="whatsapp-close-btn"
-          title="Minimizar WhatsApp">
+      <button @click="isWhatsappMinimized = true" class="whatsapp-close-btn" title="Minimizar WhatsApp">
         <i class="fa-solid fa-times"></i>
       </button>
     </div>
   </transition>
 
   <transition name="arrow-slide">
-    <button
-        v-if="showWhatsapp && isWhatsappMinimized"
-        @click="isWhatsappMinimized = false"
-        class="whatsapp-arrow-btn"
-        title="Abrir WhatsApp">
+    <button v-if="showWhatsapp && isWhatsappMinimized" @click="isWhatsappMinimized = false" class="whatsapp-arrow-btn"
+      title="Abrir WhatsApp">
       <i class="fa-solid fa-chevron-left"></i>
     </button>
   </transition>
+
+  <Promotion v-model:visible="isPromotionLoaded" :imageURL="promotionCardRef?.imageURL
+    ? promotionCardRef.imageURL
+    : '/images/Banners/BannerInicial.png'" :description="promotionCardRef?.description
+      ? promotionCardRef.description
+      : ''" @back="handleBackViewer"/>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
-import { useHead } from '#app';
+import { useHead, useNuxtApp } from '#app';
 import { computed } from 'vue';
 import AppToast from './components/Toast/AppToast.vue';
 import LoadingScreen from './components/UI/LoadingScreen.vue';
 import { storeLoading } from './infra/store/storeLoading';
 import { storeToRefs } from "pinia";
+import { useToastService } from './composable/useToast';
+import useLoading from './composable/useLoading';
+import { on } from 'events';
+import type { IPromotion } from './infra/interfaces/services/promotion';
+import Promotion from './components/Modal/Promotion.vue';
+import { delay } from './composable/useDelay';
+import { getToken } from './composable/useAuth';
 const { isLoading } = storeToRefs(storeLoading());
+
+const toast = useToastService();
+const { $httpClient } = useNuxtApp();
+const { loadingPush, loadingPop } = useLoading();
+
+const promotionCardRef = ref<IPromotion | null>(null);
+const isPromotionLoaded = ref(false);
 
 const isWhatsappMinimized = ref(false);
 const showWhatsapp = computed(() => {
@@ -61,6 +74,36 @@ useHead({
     }
   ]
 })
+
+async function LoadPromotionCard() {
+  try {
+    await delay(3000);
+
+    const promotionCard = await $httpClient.promotion.GetPromotions();
+
+    if (!promotionCard || !promotionCard.result) {
+      return null;
+    }
+
+    promotionCardRef.value = promotionCard.result;
+    isPromotionLoaded.value = true;
+  } catch (error) {
+    console.error('Erro ao carregar o componente Promotion:', error);
+    return null;
+  }
+}
+
+function handleBackViewer() {
+  isPromotionLoaded.value = false;
+}
+
+onMounted(async () => {
+  if(!getToken()) {
+    return;
+  }
+
+  await LoadPromotionCard();
+});
 </script>
 
 <style lang="scss">
