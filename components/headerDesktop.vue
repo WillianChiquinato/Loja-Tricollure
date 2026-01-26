@@ -136,7 +136,7 @@
             </div>
         </Transition>
 
-        <LoginCadastroModal v-model:visible="loginModal" :title="titleModal" @back="handleBack">
+        <LoginCadastroModal v-model:visible="modalStore.isLoginOpen" :title="titleModal" @back="handleBack">
             <div v-if="isLoginModal" class="flex flex-col gap-6 items-center justify-center p-6 !mx-4 !my-7">
                 <div class="relative w-full max-w-sm flex items-center gap-3 border-b pb-2 transition"
                     :class="!isEmailValid(emailLogin) && emailLogin ? 'border-red-500' : 'border-gray-400'">
@@ -214,15 +214,15 @@
                 </div>
 
                 <div class="relative w-full max-w-lg flex items-center gap-3 border-b pb-2 transition"
-                    :class="!isEmailValid(userRegister.email!) ? 'border-red-500' : 'border-gray-400'">
+                    :class="!isEmailValid(userRegister.email!) && userRegister.email ? 'border-red-500' : 'border-gray-400'">
                     <component :is="EnvelopeIcon" class="w-7 h-7 stroke-[1.5] flex-shrink-0"
-                        :class="!isEmailValid(userRegister.email!) ? 'text-red-500' : 'text-black'" />
+                        :class="!isEmailValid(userRegister.email!) && userRegister.email ? 'text-red-500' : 'text-black'" />
 
                     <InputText v-model.trim="userRegister.email" type="email" placeholder="Email" class="w-full bg-transparent border-0 text-gray-700 text-sm md:text-xl sm:text-lg
     focus:outline-none focus:placeholder-transparent transition-all py-2" />
                 </div>
 
-                <span v-if="!isEmailValid(userRegister.email!)" class="text-xs text-red-500 mt-1">
+                <span v-if="!isEmailValid(userRegister.email!) && userRegister.email" class="text-xs text-red-500 mt-1">
                     Email inválido
                 </span>
 
@@ -335,11 +335,13 @@ import type { IUser } from "~/infra/interfaces/services/user";
 import { cleanCpfCnpj, cleanPhoneNumber, formatCpfCnpj, formatPhoneNumber } from "~/utils/Format";
 import { clearAuth, getLoggedUser, setLoggedUser, setToken, verifyToken } from "~/composable/useAuth";
 import { isEmailValid } from "~/utils/Invalids";
+import { useModalStore } from "~/infra/store/modalStore";
 
 //Variables
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
+const modalStore = useModalStore()
 
 const search = ref("");
 const menuOpen = ref(false);
@@ -373,10 +375,9 @@ const toggleConfirmedPasswordVisibility = () => {
 };
 
 //Login Modal
-const loginModal = ref(false);
 const isLoginModal = ref(true);
 const loginModalActive = () => {
-    loginModal.value = true;
+    modalStore.isLoginOpen = true;
     isLoginModal.value = true;
 
     titleModal.value = "Já tem conta?";
@@ -384,9 +385,10 @@ const loginModalActive = () => {
 };
 
 const sigOnModalActive = () => {
-    loginModal.value = false;
+    modalStore.isLoginOpen = false;
+
     setTimeout(() => {
-        loginModal.value = true;
+        modalStore.isLoginOpen = true;
         isLoginModal.value = false;
 
         titleModal.value = "Cadastro";
@@ -471,11 +473,11 @@ async function LoadUserData() {
 
         emailLogin.value = "";
         passwordLogin.value = "";
-        loginModal.value = false;
+        modalStore.isLoginOpen = false;
     }
     catch (error) {
         toast.error("Erro", "Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.", 4000);
-        loginModal.value = false;
+        modalStore.isLoginOpen = false;
         console.error("Login error:", error);
     }
     finally {
@@ -529,7 +531,7 @@ async function createUserData() {
         };
         confirmedPassword.value = "";
 
-        loginModal.value = false;
+        modalStore.isLoginOpen = false;
         loginModalActive();
     }
     catch (error: any) {
@@ -538,7 +540,7 @@ async function createUserData() {
             return;
         }
 
-        loginModal.value = false;
+        modalStore.isLoginOpen = false;
         console.error("Create user error:", error);
     }
     finally {
@@ -547,7 +549,7 @@ async function createUserData() {
 }
 
 function handleBack() {
-    loginModal.value = false;
+    modalStore.isLoginOpen = false;
 }
 
 function logout() {

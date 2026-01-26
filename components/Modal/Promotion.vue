@@ -12,7 +12,7 @@
 
         <div class="w-full flex flex-col items-center gap-2 px-6 pb-6">
             <Button class="w-[92%] max-w-md bg-[var(--background-color)] text-black font-bold rounded-md !px-4 !py-3 flex items-center justify-center gap-3
-                    hover:!bg-[var(--secondary-color)] hover:!text-white hover:scale-[1.02] transition-all" @click="backViewer">
+                    hover:!bg-[var(--secondary-color)] hover:!text-white hover:scale-[1.02] transition-all" @click="loginRegister">
                 <component :is="ArrowRightEndOnRectangleIcon" class="w-6 h-6 stroke-[2]" />
 
                 <span class="text-xs md:text-sm">Faça Login ou Cadastre-se para aproveitar as vantagens</span>
@@ -31,11 +31,15 @@ import {
     ArrowRightEndOnRectangleIcon
 } from '@heroicons/vue/24/outline';
 
-const emit = defineEmits(['back']);
+const emit = defineEmits(['back', 'loginRegister']);
 
 const model = defineModel('visible', { default: false });
 const backViewer = () => {
     emit('back');
+}
+
+const loginRegister = () => {
+    emit('loginRegister');
 }
 
 const props = defineProps({
