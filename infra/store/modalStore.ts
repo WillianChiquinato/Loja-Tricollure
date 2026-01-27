@@ -1,16 +1,24 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 
-export const useModalStore = defineStore('modal', {
+export const useModalStore = defineStore("modal", {
   state: () => ({
     isPromotionOpen: false,
     isLoginOpen: false,
+    isShoppingCartOpen: false,
   }),
   actions: {
     openLogin() {
-      this.isLoginOpen = true
+      this.isLoginOpen = true;
     },
     closePromotion() {
-      this.isPromotionOpen = false
-    }
-  }
-})
+      this.isPromotionOpen = false;
+    },
+
+    openShoppingCart() {
+      this.isShoppingCartOpen = true;
+    },
+    closeShoppingCart() {
+      this.isShoppingCartOpen = false;
+    },
+  },
+});

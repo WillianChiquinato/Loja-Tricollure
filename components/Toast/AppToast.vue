@@ -1,5 +1,5 @@
 <template>
-  <Toast :position="isMobile ? 'top-center' : 'top-right'" :pt="{
+  <Toast :key="toastKey" :position="toastPosition" :pt="{
     root: { class: 'toast-container' },
     message: { class: 'toast-message-wrapper' },
     closeButton: { style: 'display: none' }
@@ -24,14 +24,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
+import { useModalStore } from '~/infra/store/modalStore'
 
+const modalStore = useModalStore()
 const toast = useToast()
-const isMobile = computed(() => {
-  return window.innerWidth <= 640
+const isMobile = ref(window.innerWidth <= 640)
+const toastKey = ref(0)
+
+const toastPosition = computed(() => {
+  if (isMobile.value) return 'top-center'
+  if (modalStore.isShoppingCartOpen) return 'bottom-center'
+  return 'top-right'
+})
+
+const onResize = () => {
+  isMobile.value = window.innerWidth <= 640
+}
+
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
 })
 
 const iconMap: Record<string, string> = {
@@ -40,6 +59,13 @@ const iconMap: Record<string, string> = {
   warn: 'pi pi-exclamation-triangle',
   error: 'pi pi-times-circle'
 }
+
+watch(
+  () => modalStore.isShoppingCartOpen,
+  () => {
+    toastKey.value++ 
+  }
+)
 </script>
 
 <style scoped lang="scss">
@@ -261,8 +287,7 @@ const iconMap: Record<string, string> = {
     box-sizing: border-box;
   }
 
-  :deep(.p-toast-top-center)
-  {
+  :deep(.p-toast-top-center) {
     right: 0 !important;
     left: 0 !important;
     top: 12px;

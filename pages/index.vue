@@ -114,13 +114,13 @@ import {
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 
-import ProductCard from '@/components/productCard.vue'
-import HeaderDesktop from '~/components/headerDesktop.vue';
+import ProductCard from '~/components/productCard.vue'
+import HeaderDesktop from '~/components/Headers.vue';
 import Footer from '~/components/Footer.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Autoplay, Navigation } from 'swiper/modules';
 import useLoading from '~/composable/useLoading';
-import { useNuxtApp } from 'nuxt/app';
+import { useNuxtApp } from '#app';
 
 import type { IRetail } from '~/infra/interfaces/services/retail';
 

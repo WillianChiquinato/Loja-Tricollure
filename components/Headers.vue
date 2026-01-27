@@ -72,7 +72,7 @@
                         </div>
                     </div>
 
-                    <div class="cartSection">
+                    <div class="cartSection" @click="toggleCart">
                         <div class="cartIconWrapper">
                             <i class="pi pi-shopping-cart"></i>
                             <span class="cartBadge">0</span>
@@ -302,6 +302,8 @@
                 </div>
             </div>
         </LoginCadastroModal>
+
+        <ShoppingCart v-model:isVisible="isCartVisible" />
     </div>
 </template>
 
@@ -336,6 +338,7 @@ import { cleanCpfCnpj, cleanPhoneNumber, formatCpfCnpj, formatPhoneNumber } from
 import { clearAuth, getLoggedUser, setLoggedUser, setToken, verifyToken } from "~/composable/useAuth";
 import { isEmailValid } from "~/utils/Invalids";
 import { useModalStore } from "~/infra/store/modalStore";
+import ShoppingCart from "./ShoppingCart.vue";
 
 //Variables
 const { $httpClient } = useNuxtApp();
@@ -345,7 +348,7 @@ const modalStore = useModalStore()
 
 const search = ref("");
 const menuOpen = ref(false);
-const isVisible = ref(false);
+const isCartVisible = ref(false);
 const titleModal = ref("");
 
 //Email and password text.
@@ -402,6 +405,11 @@ const searchButton = () => {
 
 const toggleMenu = () => {
     menuOpen.value = !menuOpen.value;
+};
+
+//Carrinho.
+const toggleCart = () => {
+    isCartVisible.value = !isCartVisible.value;
 };
 
 const placeHolderNotifications = [
