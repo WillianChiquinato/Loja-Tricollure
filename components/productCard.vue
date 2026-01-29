@@ -1,32 +1,70 @@
 <template>
     <div class="bg-white rounded-lg border border-gray-500 shadow-md overflow-hidden product-card">
-        <img :src="product.image" class="w-full h-72 object-cover rounded-t-lg" alt="" />
+        <div class="relative">
+            <img :src="product?.images?.find((image: any) => image.isPrimary)?.imageURL"
+                class="w-full h-72 object-cover rounded-t-lg" alt="" />
+
+            <!-- Overlay com blur -->
+            <Transition name="fade">
+                <div v-if="showDetails" class="absolute inset-0 bg-white/60 backdrop-blur-sm
+           flex items-end justify-center z-10 pb-4">
+                    <div class="flex flex-col">
+                        <div class="prime-group">
+                            <label class="prime-label">Cores</label>
+
+                            <Dropdown v-model="selectedColor" :options="colors" optionLabel="label" optionValue="value"
+                                placeholder="Selecione uma cor" class="prime-dropdown" />
+                        </div>
+
+                        <div class="prime-group">
+                            <label class="prime-label">Tamanhos</label>
+
+                            <Dropdown v-model="selectedSize" :options="sizes" placeholder="Selecione um tamanho"
+                                class="prime-dropdown" />
+                        </div>
+
+                        <div class="w-full flex justify-center text-center">
+                            <button @click="closeDetails" class="text-xl text-red-600 hover:text-red-800
+                            text-center
+                            !mb-2
+                            border border-red-600 rounded-full
+                            w-8 h-8 flex items-center justify-center
+                            hover:scale-110 transition-transform">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </div>
 
         <div class="p-5 flex flex-col text-center">
-            <h2 class="font-semibold text-lg mt-5 mb-3">
-                {{ product.name }}
+            <h2 class="font-semibold text-lg mt-5 mb-3 line-clamp-1 break-words">
+                {{ product?.product?.name }}
             </h2>
 
             <p class="text-sm line-through text-gray-400">
-                R${{ formatNumber(product.price * 1.2) }}
+                R${{ formatNumber(product?.skus?.[0]?.price ? product.skus[0].price * 1.2 : 0) }}
             </p>
 
             <p class="text-lg font-bold text-amber-700">
-                R${{ formatNumber(product.pix) }} <span class="text-sm">com PIX</span>
+                R${{ formatNumber(product?.skus?.[0]?.price ? product.skus[0].price : 0) }} <span class="text-sm">com
+                    PIX</span>
             </p>
             <p>ou</p>
             <p class="text-sm text-gray-800">
-                <strong>{{ product.creditQuantity }}x</strong> de <strong>R${{ formatNumber(product.price /
-                    product.creditQuantity) }}</strong> sem juros
+                <strong>{{ credit[0].Quantity }}</strong> de <strong>R${{ formatNumber(product?.skus?.[0]?.price ?
+                    product.skus[0].price /
+                    credit[0].Quantity : 0) }}</strong> sem juros
             </p>
 
             <div class="flex button-buyEye">
-                <button class="buy-button flex">
+                <button class="buy-button flex" @click="buyProduct">
                     <ShoppingBagIcon class="w-5 h-5 stroke-[1.5] text-white" />
                     <span class="text-xs font-semibold">COMPRAR</span>
                 </button>
-                
-                <button class="eye-button flex">
+
+                <button class="eye-button flex" @click="openDetails">
                     <EyeIcon class="w-5 h-5 stroke-[1.5] text-white" />
                     <span class="text-xs font-semibold">DETALHES</span>
                 </button>
@@ -35,16 +73,65 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { navigateTo } from '#app';
+
 import { formatNumber } from '~/utils/Format';
 import {
     ShoppingBagIcon,
     EyeIcon
 } from '@heroicons/vue/24/outline'
 
-defineProps({
+import { CreditInterface } from '~/infra/interfaces/credit';
+import { useToastService } from '~/composable/useToast';
+
+const toast = useToastService();
+// Defina as props primeiro
+const props = defineProps({
     product: Object
 })
+
+const showDetails = ref(false);
+const credit = CreditInterface();
+
+const selectedColor = ref(null)
+const selectedSize = ref(null)
+const selectedModel = ref(null)
+
+// Agora use props.product em vez de apenas product
+const colors = computed(() => {
+    if (!props.product || !props.product.skus) return [];
+    return [...new Set(props.product.skus.map((sku: any) => sku.color))]
+        .map(color => ({
+            label: typeof color === 'string' ? color.charAt(0).toUpperCase() + color.slice(1) : '',
+            value: color
+        }))
+})
+
+/* 📏 Tamanhos únicos */
+const sizes = computed(() => {
+    if (!props.product || !props.product.skus) return [];
+    return [...new Set(props.product.skus.map((sku: any) => sku.size))]
+})
+
+const openDetails = () => {
+    showDetails.value = true
+    console.log("Produto Aberto: ", props.product);
+}
+
+const closeDetails = () => {
+    showDetails.value = false
+}
+
+function buyProduct() {
+    if (!selectedColor.value || !selectedSize.value) {
+        toast.info('Por favor, selecione uma cor e um tamanho antes de comprar.');
+        return;
+    }
+
+    toast.success('Produto adicionado ao carrinho!');
+}
 </script>
 
 <style scoped lang="scss">
@@ -104,5 +191,63 @@ defineProps({
             background-color: #777;
         }
     }
+}
+
+.prime-group {
+    width: 180px;
+    min-width: 180px;
+    text-align: center;
+    margin-bottom: 1.4rem;
+}
+
+.prime-label {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.prime-dropdown {
+    width: 100%;
+}
+
+/* Container */
+.prime-dropdown .p-dropdown {
+    border-radius: 0.6rem;
+    border: 1px solid #c9a37a;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* Texto */
+.prime-dropdown .p-dropdown-label {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Ícone */
+.prime-dropdown .p-dropdown-trigger {
+    width: 2.5rem;
+}
+
+.prime-dropdown .p-dropdown-trigger-icon {
+    color: #666;
+}
+
+/* Focus */
+.prime-dropdown.p-focus .p-dropdown {
+    border-color: #9D5C26;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>

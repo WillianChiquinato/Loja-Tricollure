@@ -7,6 +7,7 @@ import "primeicons/primeicons.css";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
+import Dropdown from 'primevue/dropdown'
 import Toast from "primevue/toast";
 import { InputMask } from "primevue";
 
@@ -34,4 +35,5 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.component("Button", Button);
   nuxtApp.vueApp.component("Dialog", Dialog);
   nuxtApp.vueApp.component("InputMask", InputMask);
+  nuxtApp.vueApp.component("Dropdown", Dropdown);
 });

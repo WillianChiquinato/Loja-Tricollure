@@ -49,7 +49,7 @@
       1024: { slidesPerView: 4 },
       1300: { slidesPerView: 5 }
     }" class="products-swiper">
-      <SwiperSlide v-for="product in products" :key="product.id" class="swiper-slide-flex">
+      <SwiperSlide v-for="product in productConsolidateds" :key="product.id" class="swiper-slide-flex">
         <ProductCard :product="product" />
       </SwiperSlide>
     </Swiper>
@@ -74,9 +74,11 @@
           </label>
           <InputText v-model="newsLetter.email" type="email" class="w-full bg-transparent border-0 border-b border-gray-400
              text-center focus:outline-none focus:ring-0
-             focus:border-gray-700" :class="!isEmailValid(newsLetter.email!) && newsLetter.email ? 'border-red-500' : 'border-gray-400'" />
+             focus:border-gray-700"
+            :class="!isEmailValid(newsLetter.email!) && newsLetter.email ? 'border-red-500' : 'border-gray-400'" />
 
-          <span v-if="!isEmailValid(newsLetter.email!) && newsLetter.email" class="block text-sm text-red-500 text-center">
+          <span v-if="!isEmailValid(newsLetter.email!) && newsLetter.email"
+            class="block text-sm text-red-500 text-center">
             Email inválido
           </span>
         </div>
@@ -114,7 +116,7 @@ import {
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 
-import ProductCard from '~/components/productCard.vue'
+import ProductCard from '~/components/ProductCard.vue'
 import HeaderDesktop from '~/components/Headers.vue';
 import Footer from '~/components/Footer.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
@@ -141,11 +143,15 @@ import { delay } from '~/composable/useDelay';
 import { useToastService } from '~/composable/useToast';
 import { NewsLetterSource, type INewsLetter } from '~/infra/interfaces/services/newsLetter';
 import { isEmailValid, isPhoneNumberValid } from '~/utils/Invalids';
+import type { IProductImage, IProductsConsolidated } from '~/infra/interfaces/services/productsConsolidated';
 
 const toast = useToastService();
 
 const retailList = ref<IRetail[]>([]);
 const DestaqueImage = ref<IRetail | null>(null);
+
+//Aba de produtos.
+const productConsolidateds = ref<IProductsConsolidated[]>([]);
 
 const newsLetter = ref<Partial<INewsLetter>>({
   email: '',
@@ -173,73 +179,6 @@ const promotionsHomePage = [
     title: 'Whatsapp',
     subtitle: 'Contato no numero (11)94864-1187',
     icon: PhoneIcon,
-  },
-]
-
-const products = [
-  {
-    id: 1,
-    name: 'Vestido Azul',
-    price: 499.90,
-    pix: 359.90,
-    creditQuantity: 4,
-    image: Product1
-  },
-  {
-    id: 2,
-    name: 'Blusa Sofisticada',
-    price: 109.90,
-    pix: 79.90,
-    creditQuantity: 4,
-    image: Product2
-  },
-  {
-    id: 3,
-    name: 'Vestido Midi com fenda',
-    price: 40.00,
-    pix: 35.90,
-    creditQuantity: 4,
-    image: Product3
-  },
-  {
-    id: 4,
-    name: 'Vestido Longo',
-    price: 119.90,
-    pix: 100.00,
-    creditQuantity: 4,
-    image: Product4
-  },
-  {
-    id: 5,
-    name: 'Saia Rodada',
-    price: 89.90,
-    pix: 70.00,
-    creditQuantity: 4,
-    image: Product5
-  },
-  {
-    id: 6,
-    name: 'Macacão Estampado',
-    price: 159.90,
-    pix: 120.00,
-    creditQuantity: 4,
-    image: Product6
-  },
-  {
-    id: 7,
-    name: 'Vestido Casual',
-    price: 79.90,
-    pix: 59.90,
-    creditQuantity: 4,
-    image: Product7
-  },
-  {
-    id: 8,
-    name: 'Blusa de Seda',
-    price: 129.90,
-    pix: 99.90,
-    creditQuantity: 4,
-    image: Product8
   },
 ]
 
@@ -311,8 +250,32 @@ async function subscriberNewsLetter(newsLetter: Partial<INewsLetter>) {
   }
 }
 
-onMounted(() => {
+async function loadProductsEmphasis() {
+  loadingPush();
+
+  try {
+    var resultProduct = await $httpClient.product.GetProductsConsolidateds(1, 8);
+
+    if (!resultProduct || resultProduct.result.length === 0) {
+      toast.error("Nenhum produto encontrado.");
+      return;
+    }
+
+    productConsolidateds.value = resultProduct.result;
+    console.log("TES: ", productConsolidateds.value);
+    
+  } catch (err) {
+    console.warn("Erro ao carregar produtos em destaque:", err);
+    toast.error("Erro ao carregar produtos em destaque. Tente novamente mais tarde.");
+  }
+  finally {
+    loadingPop();
+  }
+}
+
+onMounted(async () => {
   loadRetails();
+  await loadProductsEmphasis();
 });
 </script>
 

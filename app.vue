@@ -105,7 +105,7 @@ function handleLoginRegister() {
 }
 
 onMounted(async () => {
-  if(!getToken()) {
+  if(getToken()) {
     return;
   }
 
