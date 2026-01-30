@@ -21,6 +21,14 @@ export interface IProductImage {
   isPrimary: boolean;
 }
 
+export interface IVerifyStockResult {
+  productId: number
+  size: string
+  color: string
+  availableStock: number
+  isStockSufficient: boolean
+}
+
 export default class ProductsConsolidatedService extends ClientService<any> {
   constructor() {
     super("ProductsConsolidateds", "api/ProductConsolidateds");
@@ -39,4 +47,19 @@ export default class ProductsConsolidatedService extends ClientService<any> {
       },
     )) as ApiResponse<IProductsConsolidated[]>;
   };
+
+    verifyStock = async (
+      productId: number,
+      color: string,
+      size: string,
+      config: FetchOptions = {},
+    ): Promise<ApiResponse<IVerifyStockResult>> => {
+      return (await this.fetchInstance(
+        `${this.address}/VerifyStock?productId=${productId}&color=${color}&size=${size}`,
+        {
+          method: "GET",
+          ...config,
+        },
+      )) as ApiResponse<IVerifyStockResult>;
+    }
 }

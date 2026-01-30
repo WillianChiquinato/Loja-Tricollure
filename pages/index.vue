@@ -262,8 +262,6 @@ async function loadProductsEmphasis() {
     }
 
     productConsolidateds.value = resultProduct.result;
-    console.log("TES: ", productConsolidateds.value);
-    
   } catch (err) {
     console.warn("Erro ao carregar produtos em destaque:", err);
     toast.error("Erro ao carregar produtos em destaque. Tente novamente mais tarde.");

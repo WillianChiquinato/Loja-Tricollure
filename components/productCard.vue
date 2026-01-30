@@ -44,7 +44,7 @@
             </h2>
 
             <p class="text-sm line-through text-gray-400">
-                R${{ formatNumber(product?.skus?.[0]?.price ? product.skus[0].price * 1.2 : 0) }}
+                R${{ formatNumber(product?.skus?.[0]?.price ? product.skus[0].price * 1.45 : 0) }}
             </p>
 
             <p class="text-lg font-bold text-amber-700">
@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { navigateTo } from '#app';
+import { navigateTo, useNuxtApp } from '#app';
 
 import { formatNumber } from '~/utils/Format';
 import {
@@ -85,7 +85,12 @@ import {
 
 import { CreditInterface } from '~/infra/interfaces/credit';
 import { useToastService } from '~/composable/useToast';
+import { useModalStore } from '~/infra/store/modalStore';
+import type { ICartItem } from '~/infra/interfaces/services/cart';
+import type { IAuth } from '~/infra/interfaces/services/auth';
+const { $httpClient } = useNuxtApp();
 
+const modalStore = useModalStore()
 const toast = useToastService();
 // Defina as props primeiro
 const props = defineProps({
@@ -124,13 +129,54 @@ const closeDetails = () => {
     showDetails.value = false
 }
 
-function buyProduct() {
+async function buyProduct() {
     if (!selectedColor.value || !selectedSize.value) {
         toast.info('Por favor, selecione uma cor e um tamanho antes de comprar.');
         return;
     }
 
-    toast.success('Produto adicionado ao carrinho!');
+    try {
+        var response = await $httpClient.product.verifyStock(props.product?.product?.id, selectedColor.value, selectedSize.value);
+        var responseUser = await $httpClient.auth.Logged();
+
+        // Se não estiver logado, result será null ou undefined
+        if (!responseUser.user.result) {
+            toast.info('Por favor, faça login para continuar com a compra.');
+            modalStore.isLoginOpen = true;
+            return;
+        }
+
+        if (response.result != null) {
+            //Adiciona ao carrinho.
+            const cartItem: ICartItem = {
+                userId: responseUser.user.result.id,
+                sessionId: "",
+                products: [{
+                    productId: response.result.productId,
+                    color: response.result.color,
+                    size: response.result.size,
+                    quantity: 1
+                }]
+            };
+            
+            var responseAddCart = await $httpClient.cart.addToCart(cartItem);
+
+            if (responseAddCart.success) {
+                toast.success('Produto adicionado ao carrinho com sucesso!');
+            }
+            else {
+                toast.error('Ocorreu um erro ao adicionar o produto ao carrinho. Por favor, tente novamente mais tarde.');
+            }
+        }
+        else
+        {
+            toast.error('Estoque insuficiente para o produto selecionado. Por favor, escolha outra variação.');
+        }
+    }
+    catch (error) {
+        console.error('Erro ao navegar para a página de checkout:', error);
+        toast.error('Ocorreu um erro ao tentar comprar o produto. Por favor, tente novamente mais tarde.');
+    }
 }
 </script>
 

@@ -31,7 +31,7 @@
     ? promotionCardRef.imageURL
     : '/images/Banners/BannerInicial.png'" :description="promotionCardRef?.description
       ? promotionCardRef.description
-      : ''" @back="handleBackViewer" @loginRegister="handleLoginRegister"/>
+      : ''" @back="handleBackViewer" @loginRegister="handleLoginRegister" />
 </template>
 
 <script setup lang="ts">
@@ -49,7 +49,7 @@ import { on } from 'events';
 import type { IPromotion } from './infra/interfaces/services/promotion';
 import Promotion from './components/Modal/Promotion.vue';
 import { delay } from './composable/useDelay';
-import { getToken } from './composable/useAuth';
+import { checkAuth, getToken } from './composable/useAuth';
 import { useModalStore } from './infra/store/modalStore';
 const { isLoading } = storeToRefs(storeLoading());
 
@@ -105,11 +105,11 @@ function handleLoginRegister() {
 }
 
 onMounted(async () => {
-  if(getToken()) {
-    return;
-  }
+  const isAuthenticated = await checkAuth();
 
-  await LoadPromotionCard();
+  if (!isAuthenticated) {
+    await LoadPromotionCard();
+  }
 });
 </script>
 

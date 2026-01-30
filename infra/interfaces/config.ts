@@ -1,3 +1,5 @@
+import type AuthService from "./services/auth";
+import type CartService from "./services/cart";
 import type NewsLetterService from "./services/newsLetter";
 import type ProductsConsolidatedService from "./services/productsConsolidated";
 import type PromotionService from "./services/promotion";
@@ -11,6 +13,8 @@ export interface IClientHttp {
 	newsLetter: NewsLetterService;
 	promotion: PromotionService;
 	product: ProductsConsolidatedService;
+	cart: CartService;
+	auth: AuthService;
 }
 
 // export interface IClientHttpCustom {

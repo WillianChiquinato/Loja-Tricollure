@@ -1,3 +1,5 @@
+import { useNuxtApp } from "#app";
+
 export function getToken() {
   return localStorage.getItem("token");
 }
@@ -43,5 +45,19 @@ function isTokenExpired(token: string): boolean {
     return payload.exp * 1000 < Date.now();
   } catch {
     return true;
+  }
+}
+
+export async function checkAuth() {
+  const token = getToken();
+  if (!token) return false;
+
+  try {
+    const { $httpClient } = useNuxtApp();
+    await $httpClient.auth.Logged();
+    return true;
+  } catch {
+    clearAuth();
+    return false;
   }
 }
