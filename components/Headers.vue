@@ -22,9 +22,8 @@
 
             <!-- Área principal -->
             <div class="flex flex-col lg:flex-row items-center justify-between px-4 md:px-8 lg:px-12 headerMainArea">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 logoWrapper">
                     <img :src="logo" alt="Logo" class="logoContent" />
-
                     <button @click="toggleMenu" class="lg:hidden text-white hamburgerButton">
                         <i class="pi pi-bars text-2xl"></i>
                     </button>
@@ -48,7 +47,7 @@
                             <i v-if="verifyToken()" class="pi pi-user"></i>
                             <i v-else class="pi pi-user-plus"></i>
                         </div>
-                        
+
                         <!-- LOGADO -->
                         <div v-if="verifyToken()" class="userInfo">
                             <p class="userName">
@@ -804,11 +803,16 @@ onMounted(() => {
     text-decoration: none;
 }
 
+.logoWrapper {
+    height: 90px;
+    display: flex;
+    align-items: center;
+}
+
 .logoContent {
-    height: 100px;
+    height: 200px;
     width: auto;
-    object-fit: cover;
-    scale: 1.6;
+    object-fit: contain;
 }
 
 /* User Section Styles */
@@ -836,7 +840,7 @@ onMounted(() => {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     transition: all 0.3s ease;
-    
+
     i {
         font-size: 1.25rem;
         color: white;
