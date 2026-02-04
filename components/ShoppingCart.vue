@@ -12,9 +12,11 @@
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto !px-2 !space-y-4">
-                <!-- itens do carrinho -->
+            <div v-if="cartItems.length != 0" class="flex-1 overflow-y-auto !px-2 !space-y-4">
                 <CartItem v-for="item in cartItems" :key="item.id" :item="item" @remove="removeItem" />
+            </div>
+            <div v-else class="flex-1 justify-center text-center !px-2 !space-y-7 !py-4">
+                <span class="text-sm text-gray-600">Nenhum item adicionado no carrinho até o momento</span>
             </div>
 
             <div class="footerContainer">
@@ -60,58 +62,25 @@
 </template>
 
 <script setup lang="ts">
+import { useNuxtApp } from '#app';
 import { InputMask, InputText } from 'primevue';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 import {
     ClipboardDocumentCheckIcon
 } from '@heroicons/vue/24/outline';
 import CartItem from './CartItem.vue';
+import { useCarrinhoStore } from '~/infra/store/carrinhoStore';
+import { storeToRefs } from 'pinia';
 import { useToastService } from '~/composable/useToast';
+import useLoading from '~/composable/useLoading';
 
+const { $httpClient } = useNuxtApp();
+const { loadingPush, loadingPop } = useLoading();
 const toast = useToastService();
 
-// Mock data
-const cartItems = ref([
-    {
-        id: 1,
-        name: 'Shorts tricot personalizado',
-        category: 'ballet',
-        size: 'PP',
-        quantity: 1,
-        pricePerUnit: 325.00,
-        priceLabel: 'R$ 325,00',
-        hasDiscount: false,
-        image: '/Images/ShopCart/Bege.png'
-    },
-    {
-        id: 2,
-        name: 'Shorts tricot personalizado',
-        category: 'ballet',
-        size: 'PP',
-        quantity: 1,
-        pricePerUnit: 500.00,
-        priceLabel: 'R$ 500,00',
-        hasDiscount: false,
-        image: '/Images/ShopCart/EstiloRica.png'
-    },
-    {
-        id: 3,
-        name: 'Shorts tricot personalizado',
-        category: 'ballet',
-        size: 'PP',
-        quantity: 2,
-        pricePerUnit: 159.00,
-        priceLabel: 'R$ 159,00',
-        hasDiscount: false,
-        image: '/Images/ShopCart/FrontBege.png'
-    },
-]);
-
-const removeItem = (itemId: number) => {
-    cartItems.value = cartItems.value.filter(item => item.id !== itemId);
-    toast.success('Item removido do carrinho.', '', 1500);
-};
+const carrinhoStore = useCarrinhoStore();
+const { items: cartItems, cartTotal } = storeToRefs(carrinhoStore);
 
 const cep = ref('');
 const calculatedCEP = () => {
@@ -121,9 +90,7 @@ const calculatedCEP = () => {
     console.log('Calculando frete para o CEP:', cleanCEP);
 };
 
-const total = computed(() => {
-    return cartItems.value.reduce((sum, item) => sum + (item.pricePerUnit * item.quantity), 0);
-});
+const total = computed(() => cartTotal.value);
 
 const formatPrice = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -138,6 +105,26 @@ const props = defineProps({
         required: true
     }
 });
+
+async function removeItem(cartItemId: number) {
+    loadingPush();
+
+    try {
+        var deleteProduct = await $httpClient.cartItem.RemoveItemFromCart(cartItemId);
+
+        if (!deleteProduct.success)
+        {
+            toast.error("Error", "Erro ao remover o produto do carrinho!");
+        }
+
+        toast.success("Produto deletado com sucesso!!");
+        carrinhoStore.removeItem(cartItemId);
+    } catch (error) {
+        toast.success("Produto deletado com sucesso!!");
+    } finally {
+        loadingPop();
+    }
+}
 </script>
 
 <style scoped lang="scss">

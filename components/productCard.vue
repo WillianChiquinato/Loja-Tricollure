@@ -74,6 +74,7 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { ref, computed } from 'vue'
 import { navigateTo, useNuxtApp } from '#app';
 
@@ -88,9 +89,13 @@ import { useToastService } from '~/composable/useToast';
 import { useModalStore } from '~/infra/store/modalStore';
 import type { ICartItem } from '~/infra/interfaces/services/cart';
 import type { IAuth } from '~/infra/interfaces/services/auth';
-const { $httpClient } = useNuxtApp();
+import { useCarrinhoStore } from '~/infra/store/carrinhoStore';
 
+const { $httpClient } = useNuxtApp();
 const modalStore = useModalStore()
+const carrinhoStore = useCarrinhoStore();
+const { items: cartItems, cartTotal } = storeToRefs(carrinhoStore);
+
 const toast = useToastService();
 // Defina as props primeiro
 const props = defineProps({
@@ -122,7 +127,6 @@ const sizes = computed(() => {
 
 const openDetails = () => {
     showDetails.value = true
-    console.log("Produto Aberto: ", props.product);
 }
 
 const closeDetails = () => {
@@ -158,7 +162,7 @@ async function buyProduct() {
                     quantity: 1
                 }]
             };
-            
+
             var responseAddCart = await $httpClient.cart.addToCart(cartItem);
 
             if (responseAddCart.success) {
@@ -168,8 +172,7 @@ async function buyProduct() {
                 toast.error('Ocorreu um erro ao adicionar o produto ao carrinho. Por favor, tente novamente mais tarde.');
             }
         }
-        else
-        {
+        else {
             toast.error('Estoque insuficiente para o produto selecionado. Por favor, escolha outra variação.');
         }
     }

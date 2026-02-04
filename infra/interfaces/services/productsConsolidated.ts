@@ -14,12 +14,35 @@ export interface IProductsConsolidated {
   productImages: IProductImage[];
 }
 
+export interface IProductsInCart {
+  id: number;
+  name: string;
+  isActive: boolean;
+  quantity: number;
+  images: IProductImage[];
+  skus: IProductSku[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IProductImage {
   id: number;
   productId: number;
   imageURL: string;
   isPrimary: boolean;
 }
+
+export interface IProductSku {
+  id: number;
+  productId: number;
+  skuCode: string;
+  color: string;
+  size: string;
+  price: number;
+  stock: number;
+  isActive: boolean;
+}
+
 
 export interface IVerifyStockResult {
   productId: number

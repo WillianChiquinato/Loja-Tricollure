@@ -45,18 +45,20 @@ import { storeLoading } from './infra/store/storeLoading';
 import { storeToRefs } from "pinia";
 import { useToastService } from './composable/useToast';
 import useLoading from './composable/useLoading';
-import { on } from 'events';
 import type { IPromotion } from './infra/interfaces/services/promotion';
 import Promotion from './components/Modal/Promotion.vue';
 import { delay } from './composable/useDelay';
-import { checkAuth, getToken } from './composable/useAuth';
+import { checkAuth, getLoggedUser, getToken } from './composable/useAuth';
 import { useModalStore } from './infra/store/modalStore';
+import { useCarrinhoStore } from './infra/store/carrinhoStore';
 const { isLoading } = storeToRefs(storeLoading());
 
 const toast = useToastService();
 const { $httpClient } = useNuxtApp();
 const { loadingPush, loadingPop } = useLoading();
 const modalStore = useModalStore()
+const carrinhoStore = useCarrinhoStore();
+const getUserId = computed(() => carrinhoStore.userId);
 
 const promotionCardRef = ref<IPromotion | null>(null);
 const isPromotionLoaded = ref(false);
@@ -104,12 +106,46 @@ function handleLoginRegister() {
   modalStore.openLogin();
 }
 
+async function initCarrinho() {
+  try {
+    const result = await $httpClient.cartItem.getItemsInCart(getUserId.value ?? 0);
+
+    const mappedItems = result.result.products.map(p => {
+      const sku = p.skus.find((s: any) => s.isActive)!;
+
+      return {
+        cartItemId: p.product.id,
+        productId: p.product.id,
+        name: p.product.name,
+        image: p.images.find((i: any) => i.isPrimary)?.imageURL,
+        skuId: sku.id,
+        size: sku.size,
+        color: sku.color,
+        price: sku.price,
+        stock: sku.stock,
+        quantity: 1,
+
+        skus: p.skus,
+      };
+    });
+
+    carrinhoStore.setItems(mappedItems);
+  } catch (error) {
+    carrinhoStore.clear();
+    console.warn("Carrinho não inicializado:", error);
+  }
+}
+
 onMounted(async () => {
   const isAuthenticated = await checkAuth();
-
+  
   if (!isAuthenticated) {
     await LoadPromotionCard();
+    return;
   }
+
+  carrinhoStore.setUserId(getLoggedUser().id);
+  await initCarrinho();
 });
 </script>
 

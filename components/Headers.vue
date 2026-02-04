@@ -74,7 +74,7 @@
                     <div class="cartSection" @click="toggleCart">
                         <div class="cartIconWrapper">
                             <i class="pi pi-shopping-cart"></i>
-                            <span class="cartBadge">0</span>
+                            <span class="cartBadge">{{ itemCount }}</span>
                         </div>
                         <button class="cartButton">Carrinho</button>
                     </div>
@@ -307,6 +307,8 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from "pinia";
+
 import { computed, onMounted, ref } from "vue";
 import logo from "~/assets/images/Logo-Tricollure.png";
 import LoginCadastroModal from "~/components/Modal/LoginCadastroModal.vue";
@@ -338,6 +340,7 @@ import { clearAuth, getLoggedUser, setLoggedUser, setToken, verifyToken } from "
 import { isEmailValid } from "~/utils/Invalids";
 import { useModalStore } from "~/infra/store/modalStore";
 import ShoppingCart from "./ShoppingCart.vue";
+import { useCarrinhoStore } from "~/infra/store/carrinhoStore";
 
 //Variables
 const { $httpClient } = useNuxtApp();
@@ -376,6 +379,9 @@ const toggleConfirmedPasswordVisibility = () => {
     confirmedOpenPassword.value = !confirmedOpenPassword.value;
 };
 
+const carrinhoStore = useCarrinhoStore();
+const { itemCount } = storeToRefs(carrinhoStore);
+
 //Login Modal
 const isLoginModal = ref(true);
 const loginModalActive = () => {
@@ -383,7 +389,6 @@ const loginModalActive = () => {
     isLoginModal.value = true;
 
     titleModal.value = "Já tem conta?";
-    console.log("Login modal activated");
 };
 
 const sigOnModalActive = () => {
@@ -394,7 +399,6 @@ const sigOnModalActive = () => {
         isLoginModal.value = false;
 
         titleModal.value = "Cadastro";
-        console.log("Sign on modal activated");
     }, 100);
 };
 

@@ -1,6 +1,7 @@
 import type { $Fetch, FetchOptions, FetchResponse } from "ofetch";
 import ClientService from "~/infra/clientService";
 import type { ApiResponse } from "~/infra/response/apiResponse";
+import type { IProductsInCart } from "./productsConsolidated";
 
 export interface ICartItem {
   userId: number;
@@ -30,4 +31,17 @@ export default class CartService extends ClientService<any> {
       ...config,
     })) as ApiResponse<ICartItem>;
   };
+
+  getItemsInCart = async (
+    userId: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IProductsInCart[]>> => {
+    return (await this.fetchInstance(
+      `${this.address}/getItemsInCart?userId=${userId}`,
+      {
+        method: "GET",
+        ...config,
+      },
+    )) as ApiResponse<IProductsInCart[]>;
+  }
 }

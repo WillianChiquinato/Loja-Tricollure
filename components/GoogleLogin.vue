@@ -26,7 +26,7 @@ const emit = defineEmits(['closeModal'])
 
 const handleGoogleResponse = async (response: any) => {
     loadingPush();
-        
+
     const token = response.credential
 
     try {
@@ -51,28 +51,28 @@ const handleGoogleResponse = async (response: any) => {
 }
 
 const loginWithGoogle = () => {
-  const btn = googleBtn.value?.querySelector('div[role=button]') as HTMLElement
-  btn?.click()
+    const btn = googleBtn.value?.querySelector('div[role=button]') as HTMLElement
+    btn?.click()
 }
 
 const googleBtn = ref<HTMLElement | null>(null)
 
 onMounted(() => {
-  if (!window.google || !googleBtn.value) return
+    if (!window.google || !googleBtn.value) return
 
-  window.google.accounts.id.initialize({
-    client_id: clientId,
-    callback: handleGoogleResponse
-  })
+    window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleResponse
+    })
 
-  window.google.accounts.id.renderButton(
-    googleBtn.value,
-    {
-      theme: 'outline',
-      size: 'large',
-      type: 'standard'
-    }
-  )
+    window.google.accounts.id.renderButton(
+        googleBtn.value,
+        {
+            theme: 'outline',
+            size: 'large',
+            type: 'standard'
+        }
+    )
 })
 </script>
 
