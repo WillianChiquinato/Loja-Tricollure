@@ -110,17 +110,11 @@ async function removeItem(cartItemId: number) {
     loadingPush();
 
     try {
-        var deleteProduct = await $httpClient.cartItem.RemoveItemFromCart(cartItemId);
-
-        if (!deleteProduct.success)
-        {
-            toast.error("Error", "Erro ao remover o produto do carrinho!");
-        }
+        await carrinhoStore.removeItem(cartItemId);
 
         toast.success("Produto deletado com sucesso!!");
-        carrinhoStore.removeItem(cartItemId);
     } catch (error) {
-        toast.success("Produto deletado com sucesso!!");
+        toast.error("Produto nao deletado!!");
     } finally {
         loadingPop();
     }

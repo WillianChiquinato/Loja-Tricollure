@@ -468,6 +468,9 @@ async function LoadUserData() {
 
         setToken(loadUser.token);
         setLoggedUser(loadUser.user);
+        
+        const user = getLoggedUser();
+        carrinhoStore.setUser(user.id);
 
         // se ainda quiser manter firstAccess (opcional)
         if (loadUser.user.firstAcess == null) {
@@ -566,10 +569,7 @@ function handleBack() {
 function logout() {
     clearAuth();
     toast.success("Logout", "Você saiu da sua conta com sucesso.", 3000);
-
-    setTimeout(() => {
-        location.reload();
-    }, 700);
+    carrinhoStore.setUser(null);
 }
 
 onMounted(() => {

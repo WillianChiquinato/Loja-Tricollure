@@ -139,21 +139,18 @@ async function buyProduct() {
         return;
     }
 
+    if (!carrinhoStore.isLogged) {
+        toast.info('Por favor, faça login para continuar com a compra.');
+        modalStore.isLoginOpen = true;
+        return;
+    }
+
     try {
         var response = await $httpClient.product.verifyStock(props.product?.product?.id, selectedColor.value, selectedSize.value);
-        var responseUser = await $httpClient.auth.Logged();
-
-        // Se não estiver logado, result será null ou undefined
-        if (!responseUser.user.result) {
-            toast.info('Por favor, faça login para continuar com a compra.');
-            modalStore.isLoginOpen = true;
-            return;
-        }
 
         if (response.result != null) {
-            //Adiciona ao carrinho.
             const cartItem: ICartItem = {
-                userId: responseUser.user.result.id,
+                userId: carrinhoStore.userId ?? 0,
                 sessionId: "",
                 products: [{
                     productId: response.result.productId,
@@ -163,22 +160,20 @@ async function buyProduct() {
                 }]
             };
 
-            var responseAddCart = await $httpClient.cart.addToCart(cartItem);
-
-            if (responseAddCart.success) {
-                toast.success('Produto adicionado ao carrinho com sucesso!');
-            }
-            else {
-                toast.error('Ocorreu um erro ao adicionar o produto ao carrinho. Por favor, tente novamente mais tarde.');
-            }
-        }
-        else {
-            toast.error('Estoque insuficiente para o produto selecionado. Por favor, escolha outra variação.');
+            var responseProduct = await carrinhoStore.addItem(cartItem);
+            console.log("TES: ", responseProduct);
+            
+            toast.success('Produto adicionado ao carrinho com sucesso!');
         }
     }
-    catch (error) {
-        console.error('Erro ao navegar para a página de checkout:', error);
-        toast.error('Ocorreu um erro ao tentar comprar o produto. Por favor, tente novamente mais tarde.');
+    catch (error: any) {
+        if (error.code === 'NOT_LOGGED') {
+            toast.info('Por favor, faça login para continuar.');
+            modalStore.isLoginOpen = true;
+            return;
+        }
+
+        toast.error(error.message ?? 'Erro ao adicionar produto ao carrinho.');
     }
 }
 </script>

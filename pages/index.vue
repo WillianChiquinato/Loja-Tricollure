@@ -126,15 +126,6 @@ import { useNuxtApp } from '#app';
 
 import type { IRetail } from '~/infra/interfaces/services/retail';
 
-import Product1 from '@/assets/Images/Product1.png';
-import Product2 from '@/assets/Images/Product2.png';
-import Product3 from '@/assets/Images/Product3.png';
-import Product4 from '@/assets/Images/Product4.png';
-import Product5 from '@/assets/Images/Product5.png';
-import Product6 from '@/assets/Images/Product6.png';
-import Product7 from '@/assets/Images/Product7.png';
-import Product8 from '@/assets/Images/Product8.png';
-
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
@@ -143,7 +134,7 @@ import { delay } from '~/composable/useDelay';
 import { useToastService } from '~/composable/useToast';
 import { NewsLetterSource, type INewsLetter } from '~/infra/interfaces/services/newsLetter';
 import { isEmailValid, isPhoneNumberValid } from '~/utils/Invalids';
-import type { IProductImage, IProductsConsolidated } from '~/infra/interfaces/services/productsConsolidated';
+import type { IProductsConsolidated } from '~/infra/interfaces/services/productsConsolidated';
 
 const toast = useToastService();
 

@@ -12,10 +12,12 @@
 <script setup lang="ts">
 import { useNuxtApp, useRuntimeConfig } from '#app'
 import { onMounted, ref } from 'vue'
-import { setLoggedUser, setToken } from '~/composable/useAuth';
+import { getLoggedUser, setLoggedUser, setToken } from '~/composable/useAuth';
 import useLoading from '~/composable/useLoading';
 import { useToastService } from '~/composable/useToast';
+import { useCarrinhoStore } from '~/infra/store/carrinhoStore';
 
+const carrinhoStore = useCarrinhoStore();
 const { loadingPush, loadingPop } = useLoading();
 const { $httpClient } = useNuxtApp();
 const toast = useToastService();
@@ -39,6 +41,9 @@ const handleGoogleResponse = async (response: any) => {
             setLoggedUser(data.user)
 
             console.log('Usuario autenticado:', data)
+
+            const user = getLoggedUser();
+            carrinhoStore.setUser(user.id);
 
             emit('closeModal')
             loadingPop();

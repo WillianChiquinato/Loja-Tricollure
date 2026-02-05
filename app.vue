@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 import { useHead, useNuxtApp } from '#app';
 import { computed } from 'vue';
@@ -106,47 +106,18 @@ function handleLoginRegister() {
   modalStore.openLogin();
 }
 
-async function initCarrinho() {
-  try {
-    const result = await $httpClient.cartItem.getItemsInCart(getUserId.value ?? 0);
-
-    const mappedItems = result.result.products.map(p => {
-      const sku = p.skus.find((s: any) => s.isActive)!;
-
-      return {
-        cartItemId: p.product.id,
-        productId: p.product.id,
-        name: p.product.name,
-        image: p.images.find((i: any) => i.isPrimary)?.imageURL,
-        skuId: sku.id,
-        size: sku.size,
-        color: sku.color,
-        price: sku.price,
-        stock: sku.stock,
-        quantity: 1,
-
-        skus: p.skus,
-      };
-    });
-
-    carrinhoStore.setItems(mappedItems);
-  } catch (error) {
-    carrinhoStore.clear();
-    console.warn("Carrinho não inicializado:", error);
-  }
-}
-
 onMounted(async () => {
   const isAuthenticated = await checkAuth();
-  
+
   if (!isAuthenticated) {
     await LoadPromotionCard();
     return;
   }
 
-  carrinhoStore.setUserId(getLoggedUser().id);
-  await initCarrinho();
+  const user = getLoggedUser();
+  carrinhoStore.setUser(user.id);
 });
+
 </script>
 
 <style lang="scss">

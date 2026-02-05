@@ -10,7 +10,7 @@
                 </h3>
 
                 <button class="text-gray-500 hover:text-red-500 hover:scale-110 transition"
-                    @click="removeItem(item.productId)">
+                    @click="removeItem(item.skuId)">
                     <i class="pi pi-trash"></i>
                 </button>
             </div>
@@ -49,10 +49,9 @@ import { formatNumber } from '~/utils/Format';
 const emit = defineEmits(['remove']);
 
 const removeItem = (itemId: number) => {
-    console.log("Cu: ", itemId);
-    
     emit('remove', itemId);
 }
+
 
 const onSkuChange = () => {
   const newSku = props.item.skus.find((s: any) => s.id === props.item.skuId);
