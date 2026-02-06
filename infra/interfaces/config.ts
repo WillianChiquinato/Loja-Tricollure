@@ -1,6 +1,7 @@
 import type AuthService from "./services/auth";
 import type CartService from "./services/cart";
 import type CartItemService from "./services/cartItem";
+import type CepService from "./services/cep";
 import type NewsLetterService from "./services/newsLetter";
 import type ProductsConsolidatedService from "./services/productsConsolidated";
 import type PromotionService from "./services/promotion";
@@ -16,6 +17,7 @@ export interface IClientHttp {
 	product: ProductsConsolidatedService;
 	cart: CartService;
 	cartItem: CartItemService;
+	cep: CepService;
 	auth: AuthService;
 }
 

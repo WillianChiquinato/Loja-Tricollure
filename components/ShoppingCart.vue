@@ -31,11 +31,11 @@
                         <span class="text-sm text-gray-800 text-base">Informe seu CEP</span>
                     </div>
                     <div class="CEPInputSection">
-                        <InputMask v-model="cep" placeholder="CEP" mask="99999-999"
+                        <InputMask v-model="cep" placeholder="CEP" mask="99999-999" @complete="OnCepComplete(cep)"
                             class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" />
 
                         <Button class="w-[50%] max-w-md bg-[var(--secondary-color)] text-white font-bold rounded-md !px-4 !py-3 flex items-center justify-center gap-3
-                    hover:!bg-[var(--primary-color)] hover:scale-[1.02] transition-all" @click="calculatedCEP">
+                    hover:!bg-[var(--primary-color)] hover:scale-[1.02] transition-all" @click="calculatedCEP(cep)">
 
                             <span class="text-xs md:text-sm">Calcular</span>
                         </Button>
@@ -51,7 +51,7 @@
                 </p>
 
                 <Button class="w-full bg-[var(--secondary-color)] text-white font-bold rounded-md !py-2 flex items-center justify-center gap-3
-                    hover:!bg-[var(--primary-color)] hover:scale-[1.02] transition-all" @click="calculatedCEP">
+                    hover:!bg-[var(--primary-color)] hover:scale-[1.02] transition-all" @click="">
                     <component :is="ClipboardDocumentCheckIcon" class="w-9 h-9 stroke-[1.5] text-black flex-shrink-0" />
 
                     <span class="text-md md:text-xl">Finalizar Pedido</span>
@@ -81,16 +81,53 @@ const toast = useToastService();
 
 const carrinhoStore = useCarrinhoStore();
 const { items: cartItems, cartTotal } = storeToRefs(carrinhoStore);
+const total = computed(() => cartTotal.value);
 
 const cep = ref('');
-const calculatedCEP = () => {
-    var cleanCEP = cep.value.replace(/\D/g, '');
+const cepAuthorized = ref(false);
 
-    // Lógica para calcular o frete com base no CEP
-    console.log('Calculando frete para o CEP:', cleanCEP);
-};
+function OnCepComplete(addressForm: any) {
+    const cep = addressForm.replace(/\D/g, '');
+    if (cep.length !== 8) {
+        cepAuthorized.value = false;
+        return;
+    }
 
-const total = computed(() => cartTotal.value);
+    cepAuthorized.value = true;
+}
+
+function isCepValid(cep: string): boolean {
+    if (!cep) return false;
+
+    const onlyNumbers = cep.replace(/\D/g, '');
+    return onlyNumbers.length === 8;
+}
+
+async function calculatedCEP(cep: string) {
+    if (!isCepValid(cep)) {
+        toast.error('CEP incompleto');
+        return;
+    }
+
+    toast.info('Verificando CEP...');
+
+    try {
+        const response = await $httpClient.cep.ConsultarCep(
+            cep.replace(/\D/g, '')
+        );
+
+        if (response.erro) {
+            toast.error('CEP inválido');
+            return;
+        }
+
+        toast.success('CEP buscado com sucesso');
+    } catch (error) {
+        toast.error('Não foi possível calcular o frete');
+    } finally {
+        loadingPop();
+    }
+}
 
 const formatPrice = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -98,13 +135,6 @@ const formatPrice = (value: number) => {
         currency: 'BRL'
     }).format(value);
 };
-
-const props = defineProps({
-    isVisible: {
-        type: Boolean,
-        required: true
-    }
-});
 
 async function removeItem(cartItemId: number) {
     loadingPush();
@@ -119,6 +149,13 @@ async function removeItem(cartItemId: number) {
         loadingPop();
     }
 }
+
+const props = defineProps({
+    isVisible: {
+        type: Boolean,
+        required: true
+    }
+});
 </script>
 
 <style scoped lang="scss">

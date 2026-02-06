@@ -259,22 +259,31 @@ watch(
 
 /* Override PrimeVue default styles */
 :deep(.p-toast) {
-  opacity: 1 !important;
+  --p-toast-message-gap: 16px;
 }
 
 :deep(.p-toast-message) {
-  all: unset;
-  display: block;
+  position: relative !important;
+  transform: none !important;
 }
 
 :deep(.p-toast-message-content) {
   background: transparent !important;
   padding: 0 !important;
+  margin-bottom: 12px;
 }
 
 :deep(.p-toast-message-icon),
 :deep(.p-toast-message-text) {
   display: none !important;
+}
+
+:deep(.toast-message-wrapper) {
+  margin-bottom: 16px;
+}
+
+:deep(.toast-message-wrapper:last-child) {
+  margin-bottom: 0;
 }
 
 @media (max-width: 640px) {
