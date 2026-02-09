@@ -43,13 +43,12 @@ export interface IProductSku {
   isActive: boolean;
 }
 
-
 export interface IVerifyStockResult {
-  productId: number
-  size: string
-  color: string
-  availableStock: number
-  isStockSufficient: boolean
+  productId: number;
+  size: string;
+  color: string;
+  availableStock: number;
+  isStockSufficient: boolean;
 }
 
 export default class ProductsConsolidatedService extends ClientService<any> {
@@ -71,18 +70,31 @@ export default class ProductsConsolidatedService extends ClientService<any> {
     )) as ApiResponse<IProductsConsolidated[]>;
   };
 
-    verifyStock = async (
-      productId: number,
-      color: string,
-      size: string,
-      config: FetchOptions = {},
-    ): Promise<ApiResponse<IVerifyStockResult>> => {
-      return (await this.fetchInstance(
-        `${this.address}/VerifyStock?productId=${productId}&color=${color}&size=${size}`,
-        {
-          method: "GET",
-          ...config,
-        },
-      )) as ApiResponse<IVerifyStockResult>;
-    }
+  VerifyStock = async (
+    productId: number,
+    color: string,
+    size: string,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IVerifyStockResult>> => {
+    return (await this.fetchInstance(
+      `${this.address}/VerifyStock?productId=${productId}&color=${color}&size=${size}`,
+      {
+        method: "GET",
+        ...config,
+      },
+    )) as ApiResponse<IVerifyStockResult>;
+  };
+
+  GetProductsById = async (
+    id: number,
+    config: FetchOptions = {},
+  ): Promise<ApiResponse<IProductsInCart[]>> => {
+    return (await this.fetchInstance(
+      `${this.address}/GetProductsById?productId=${id}`,
+      {
+        method: "GET",
+        ...config,
+      },
+    )) as ApiResponse<IProductsInCart[]>;
+  }
 }

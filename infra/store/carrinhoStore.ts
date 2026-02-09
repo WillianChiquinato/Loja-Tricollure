@@ -20,8 +20,6 @@ export const useCarrinhoStore = defineStore("carrinho", {
 
   actions: {
     async setUser(userId: number | null) {
-      console.log("MDS DO CEU: ", userId);
-
       this.userId = userId;
       this.initialized = false;
 
@@ -57,7 +55,7 @@ export const useCarrinhoStore = defineStore("carrinho", {
           color: sku.color,
           price: sku.price,
           stock: sku.stock,
-          quantity: 1,
+          quantity: p.product.quantity,
           skus: p.skus,
         };
       });

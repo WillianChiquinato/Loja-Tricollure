@@ -13,16 +13,21 @@
             </div>
 
             <div v-if="cartItems.length != 0" class="flex-1 overflow-y-auto !px-2 !space-y-4">
-                <CartItem v-for="item in cartItems" :key="item.id" :item="item" @remove="removeItem" />
+                <CartItem v-for="item in cartItems" :key="item.id" :item="item"
+                    :isRemoving="removingItemIds.includes(item.skuId)" @remove="removeItem" />
             </div>
             <div v-else class="flex-1 justify-center text-center !px-2 !space-y-7 !py-4">
                 <span class="text-sm text-gray-600">Nenhum item adicionado no carrinho até o momento</span>
             </div>
 
             <div class="footerContainer">
-                <div class="footerBonusContent">
+                <div v-if="total > 1000" class="footerBonusContent">
                     <i class="pi pi-gift text-orange-600"></i>
                     <span class="text-sm text-gray-800">Parabéns! Você ganhou Frete Grátis</span>
+                </div>
+                <div v-else class="footerBonusContent">
+                    <i class="pi pi-info-circle text-gray-600"></i>
+                    <span class="text-sm text-gray-800">Adicione mais {{ formatPrice(1000 - total) }} para ganhar Frete Grátis</span>
                 </div>
 
                 <div class="CEPSection">
@@ -76,7 +81,7 @@ import { useToastService } from '~/composable/useToast';
 import useLoading from '~/composable/useLoading';
 
 const { $httpClient } = useNuxtApp();
-const { loadingPush, loadingPop } = useLoading();
+const { loadingPop } = useLoading();
 const toast = useToastService();
 
 const carrinhoStore = useCarrinhoStore();
@@ -85,6 +90,7 @@ const total = computed(() => cartTotal.value);
 
 const cep = ref('');
 const cepAuthorized = ref(false);
+const removingItemIds = ref<number[]>([]);
 
 function OnCepComplete(addressForm: any) {
     const cep = addressForm.replace(/\D/g, '');
@@ -137,7 +143,11 @@ const formatPrice = (value: number) => {
 };
 
 async function removeItem(cartItemId: number) {
-    loadingPush();
+    if (removingItemIds.value.includes(cartItemId)) {
+        return;
+    }
+
+    removingItemIds.value = [...removingItemIds.value, cartItemId];
 
     try {
         await carrinhoStore.removeItem(cartItemId);
@@ -146,7 +156,7 @@ async function removeItem(cartItemId: number) {
     } catch (error) {
         toast.error("Produto nao deletado!!");
     } finally {
-        loadingPop();
+        removingItemIds.value = removingItemIds.value.filter((id) => id !== cartItemId);
     }
 }
 

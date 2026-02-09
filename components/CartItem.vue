@@ -1,5 +1,5 @@
 <template>
-    <div class="cartItemContainer">
+    <div class="cartItemContainer" :class="{ 'is-removing': isRemoving }">
         <img :src="item.image" alt="Produto" class="imageProduct" />
 
         <div class="flex flex-col flex-1 justify-between !p-2">
@@ -40,6 +40,11 @@
                 </span>
             </div>
         </div>
+
+        <div v-if="isRemoving" class="item-loading">
+            <span class="item-loader" aria-hidden="true"></span>
+            <span class="text-sm">Removendo...</span>
+        </div>
     </div>
 </template>
 
@@ -71,6 +76,10 @@ const props = defineProps({
     item: {
         type: Object,
         required: true
+    },
+    isRemoving: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -82,6 +91,34 @@ const props = defineProps({
     gap: 0.6rem;
     border-radius: 0.3rem;
     border: 1px solid var(--primary-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.cartItemContainer.is-removing {
+    pointer-events: none;
+    opacity: 0.65;
+}
+
+.item-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: #6b4c2a;
+    font-weight: 600;
+}
+
+.item-loader {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(157, 92, 38, 0.25);
+    border-top-color: #9d5c26;
+    animation: cart-spin 0.8s linear infinite;
 }
 
 .imageProduct {
@@ -90,5 +127,11 @@ const props = defineProps({
     object-fit: cover;
     border-top-left-radius: 0.3rem;
     border-bottom-left-radius: 0.3rem;
+}
+
+@keyframes cart-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>

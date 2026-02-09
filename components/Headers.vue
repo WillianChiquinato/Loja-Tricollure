@@ -23,7 +23,7 @@
             <!-- Área principal -->
             <div class="flex flex-col lg:flex-row items-center justify-between px-4 md:px-8 lg:px-12 headerMainArea">
                 <div class="flex items-center gap-3 logoWrapper">
-                    <img :src="logo" alt="Logo" class="logoContent" />
+                    <img :src="logo" alt="Logo" class="logoContent" v-on:click="backToMenu" />
                     <button @click="toggleMenu" class="lg:hidden text-white hamburgerButton">
                         <i class="pi pi-bars text-2xl"></i>
                     </button>
@@ -331,7 +331,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import InputMask from 'primevue/inputmask';
 import { useToastService } from "~/composable/useToast";
-import { useNuxtApp } from "#app";
+import { navigateTo, useNuxtApp } from "#app";
 import useLoading from "~/composable/useLoading";
 import { delay } from "~/composable/useDelay";
 import type { IUser } from "~/infra/interfaces/services/user";
@@ -570,6 +570,14 @@ function logout() {
     clearAuth();
     toast.success("Logout", "Você saiu da sua conta com sucesso.", 3000);
     carrinhoStore.setUser(null);
+}
+
+function backToMenu() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    setTimeout(() => {
+        navigateTo('/');
+    }, 300);
 }
 
 onMounted(() => {
@@ -817,6 +825,7 @@ onMounted(() => {
     height: 200px;
     width: auto;
     object-fit: contain;
+    cursor: pointer;
 }
 
 /* User Section Styles */

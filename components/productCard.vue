@@ -1,5 +1,6 @@
 <template>
-    <div class="bg-white rounded-lg border border-gray-500 shadow-md overflow-hidden product-card">
+    <div class="bg-white rounded-lg border border-gray-500 shadow-md overflow-hidden product-card"
+        :class="{ 'is-navigating': isNavigating }">
         <div class="relative">
             <img :src="product?.images?.find((image: any) => image.isPrimary)?.imageURL"
                 class="w-full h-72 object-cover rounded-t-lg" alt="" />
@@ -59,12 +60,14 @@
             </p>
 
             <div class="flex button-buyEye">
-                <button class="buy-button flex" @click="buyProduct">
+                <button class="buy-button flex" @click="buyProduct" :disabled="isAddingCart">
                     <ShoppingBagIcon class="w-5 h-5 stroke-[1.5] text-white" />
-                    <span class="text-xs font-semibold">COMPRAR</span>
+                    <span v-if="isAddingCart" class="loader" aria-hidden="true"></span>
+                    <span v-if="isAddingCart" class="text-sm">Adicionando...</span>
+                    <span v-else class="text-xs font-semibold">COMPRAR</span>
                 </button>
 
-                <button class="eye-button flex" @click="openDetails">
+                <button class="eye-button flex" @click="openDetailsSession">
                     <EyeIcon class="w-5 h-5 stroke-[1.5] text-white" />
                     <span class="text-xs font-semibold">DETALHES</span>
                 </button>
@@ -75,7 +78,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { navigateTo, useNuxtApp } from '#app';
 
 import { formatNumber } from '~/utils/Format';
@@ -108,11 +111,19 @@ const credit = CreditInterface();
 const selectedColor = ref(null)
 const selectedSize = ref(null)
 const selectedModel = ref(null)
+const isNavigating = ref(false)
+
+const isAddingCart = ref(false);
 
 // Agora use props.product em vez de apenas product
 const colors = computed(() => {
     if (!props.product || !props.product.skus) return [];
-    return [...new Set(props.product.skus.map((sku: any) => sku.color))]
+    const skus = props.product.skus
+    const filtered = selectedSize.value
+        ? skus.filter((sku: any) => sku.size === selectedSize.value)
+        : skus
+
+    return [...new Set(filtered.map((sku: any) => sku.color))]
         .map(color => ({
             label: typeof color === 'string' ? color.charAt(0).toUpperCase() + color.slice(1) : '',
             value: color
@@ -122,11 +133,31 @@ const colors = computed(() => {
 /* 📏 Tamanhos únicos */
 const sizes = computed(() => {
     if (!props.product || !props.product.skus) return [];
-    return [...new Set(props.product.skus.map((sku: any) => sku.size))]
+    const skus = props.product.skus
+    const filtered = selectedColor.value
+        ? skus.filter((sku: any) => sku.color === selectedColor.value)
+        : skus
+
+    return [...new Set(filtered.map((sku: any) => sku.size))]
 })
 
-const openDetails = () => {
-    showDetails.value = true
+watch([colors, sizes], ([nextColors, nextSizes]) => {
+    if (selectedColor.value && !nextColors.some(color => color.value === selectedColor.value)) {
+        selectedColor.value = null
+    }
+
+    if (selectedSize.value && !nextSizes.includes(selectedSize.value)) {
+        selectedSize.value = null
+    }
+})
+
+const openDetailsSession = () => {
+    if (isNavigating.value) return
+
+    isNavigating.value = true
+    setTimeout(() => {
+        navigateTo(`/produto/${props.product?.product?.id}`)
+    }, 420)
 }
 
 const closeDetails = () => {
@@ -134,6 +165,11 @@ const closeDetails = () => {
 }
 
 async function buyProduct() {
+    if (!showDetails.value) {
+        showDetails.value = true
+        return
+    }
+
     if (!selectedColor.value || !selectedSize.value) {
         toast.info('Por favor, selecione uma cor e um tamanho antes de comprar.');
         return;
@@ -146,7 +182,8 @@ async function buyProduct() {
     }
 
     try {
-        var response = await $httpClient.product.verifyStock(props.product?.product?.id, selectedColor.value, selectedSize.value);
+        isAddingCart.value = true;
+        var response = await $httpClient.product.VerifyStock(props.product?.product?.id, selectedColor.value, selectedSize.value);
 
         if (response.result != null) {
             const cartItem: ICartItem = {
@@ -160,9 +197,7 @@ async function buyProduct() {
                 }]
             };
 
-            var responseProduct = await carrinhoStore.addItem(cartItem);
-            console.log("TES: ", responseProduct);
-            
+            await carrinhoStore.addItem(cartItem);
             toast.success('Produto adicionado ao carrinho com sucesso!');
         }
     }
@@ -174,6 +209,9 @@ async function buyProduct() {
         }
 
         toast.error(error.message ?? 'Erro ao adicionar produto ao carrinho.');
+    }
+    finally {
+        isAddingCart.value = false;
     }
 }
 </script>
@@ -193,6 +231,15 @@ async function buyProduct() {
     @media (max-width: 640px) {
         max-width: 100%;
     }
+}
+
+.product-card.is-navigating {
+    animation: detail-exit 420ms ease forwards;
+    pointer-events: none;
+}
+
+.product-card.is-navigating img {
+    animation: detail-blur 420ms ease forwards;
 }
 
 .button-buyEye {
@@ -293,5 +340,33 @@ async function buyProduct() {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+@keyframes detail-exit {
+    0% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    60% {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 14px 26px rgba(0, 0, 0, 0.18);
+    }
+
+    100% {
+        transform: translateY(-18px) scale(0.98);
+        opacity: 0;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    }
+}
+
+@keyframes detail-blur {
+    0% {
+        filter: blur(0) saturate(1);
+    }
+
+    100% {
+        filter: blur(2px) saturate(1.1);
+    }
 }
 </style>
