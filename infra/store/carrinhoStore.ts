@@ -10,7 +10,7 @@ export const useCarrinhoStore = defineStore("carrinho", {
   }),
 
   getters: {
-    itemCount: (state) => state.items.reduce((t, i) => t + i.quantity, 0),
+    itemCount: (state) => state.items.filter(Boolean).length,
 
     cartTotal: (state) =>
       state.items.reduce((t, i) => t + i.price * i.quantity, 0),

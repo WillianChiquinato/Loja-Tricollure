@@ -84,9 +84,21 @@
 
             <nav class="hidden lg:block bg-[var(--secondary-color)] border-y border-[#FFF3E5] border-t-0">
                 <ul class="flex justify-center gap-12 py-3">
-                    <li><a class="menuItem" href="#inicio">Inicio</a></li>
-                    <li><a class="menuItem" href="#destaques">Destaques</a></li>
-                    <li><a class="menuItem" href="#novidades">Novidades</a></li>
+                    <li>
+                        <a class="menuItem" :class="{ menuItemDisabled: !isHomeRoute }"
+                            :href="isHomeRoute ? '#inicio' : undefined" :aria-disabled="!isHomeRoute"
+                            @click="handleMenuClick">Inicio</a>
+                    </li>
+                    <li>
+                        <a class="menuItem" :class="{ menuItemDisabled: !isHomeRoute }"
+                            :href="isHomeRoute ? '#destaques' : undefined" :aria-disabled="!isHomeRoute"
+                            @click="handleMenuClick">Destaques</a>
+                    </li>
+                    <li>
+                        <a class="menuItem" :class="{ menuItemDisabled: !isHomeRoute }"
+                            :href="isHomeRoute ? '#novidades' : undefined" :aria-disabled="!isHomeRoute"
+                            @click="handleMenuClick">Novidades</a>
+                    </li>
                     <li><a class="menuItem" href="#loja">Loja</a></li>
                     <li><a class="menuItem" href="#solicitacoes">Solicitações</a></li>
                     <li><a class="menuItem" href="#rastreio">Rastreio de pedido</a></li>
@@ -331,7 +343,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import InputMask from 'primevue/inputmask';
 import { useToastService } from "~/composable/useToast";
-import { navigateTo, useNuxtApp } from "#app";
+import { navigateTo, useNuxtApp, useRoute } from "#app";
 import useLoading from "~/composable/useLoading";
 import { delay } from "~/composable/useDelay";
 import type { IUser } from "~/infra/interfaces/services/user";
@@ -352,6 +364,8 @@ const search = ref("");
 const menuOpen = ref(false);
 const isCartVisible = ref(false);
 const titleModal = ref("");
+const route = useRoute();
+const isHomeRoute = computed(() => route.path === "/");
 
 //Email and password text.
 const emailLogin = ref("");
@@ -408,6 +422,12 @@ const searchButton = () => {
 
 const toggleMenu = () => {
     menuOpen.value = !menuOpen.value;
+};
+
+const handleMenuClick = (event: MouseEvent) => {
+    if (!isHomeRoute.value) {
+        event.preventDefault();
+    }
 };
 
 //Carrinho.
@@ -472,7 +492,6 @@ async function LoadUserData() {
         const user = getLoggedUser();
         carrinhoStore.setUser(user.id);
 
-        // se ainda quiser manter firstAccess (opcional)
         if (loadUser.user.firstAcess == null) {
             await $httpClient.user.FirstAccess(
                 loadUser.user.id
@@ -577,7 +596,7 @@ function backToMenu() {
 
     setTimeout(() => {
         navigateTo('/');
-    }, 300);
+    }, 150);
 }
 
 onMounted(() => {
@@ -713,6 +732,12 @@ onMounted(() => {
     @media (min-width: 1024px) {
         font-size: 1rem;
     }
+}
+
+.menuItemDisabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .promotionsMarquee {

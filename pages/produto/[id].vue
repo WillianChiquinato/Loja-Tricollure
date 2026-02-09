@@ -5,7 +5,7 @@
         <div class="product-shell">
             <div class="product-grid">
                 <div class="thumbs">
-                    <button class="thumb-nav" type="button" @click="scrollThumbs(-1)">
+                    <button class="thumb-nav" type="button" @click="selectedNextImage(-1)">
                         <ChevronUpIcon class="w-5 h-5" />
                     </button>
 
@@ -17,7 +17,7 @@
                         </button>
                     </div>
 
-                    <button class="thumb-nav" type="button" @click="scrollThumbs(1)">
+                    <button class="thumb-nav" type="button" @click="selectedNextImage(1)">
                         <ChevronDownIcon class="w-5 h-5" />
                     </button>
                 </div>
@@ -196,15 +196,36 @@ function normalizeImage(image: any): string {
     return image.imageURL ?? image.url ?? '';
 }
 
-function scrollThumbs(direction: number) {
-    if (!thumbListRef.value) return;
-    const firstItem = thumbListRef.value.querySelector<HTMLElement>('.thumb-item');
-    const step = firstItem ? firstItem.offsetHeight + 16 : 120;
+function selectedNextImage(direction: number) {
+    const currentIndex = images.value.findIndex(
+        (img: any) => normalizeImage(img) === selectedImage.value
+    );
+    if (currentIndex === -1) return;
 
-    thumbListRef.value.scrollBy({
-        top: direction * step,
-        behavior: 'smooth'
-    });
+    let newIndex = currentIndex + direction;
+    if (newIndex < 0) newIndex = images.value.length - 1;
+    if (newIndex >= images.value.length) newIndex = 0;
+
+    selectedImage.value = normalizeImage(images.value[newIndex]);
+
+    // Scroll thumbnail into view
+    const thumbList = thumbListRef.value;
+    if (thumbList) {
+        const thumbItems = thumbList.getElementsByClassName('thumb-item');
+        const targetThumb = thumbItems[newIndex] as HTMLElement;
+        if (targetThumb) {
+            const thumbTop = targetThumb.offsetTop;
+            const thumbHeight = targetThumb.offsetHeight;
+            const listScrollTop = thumbList.scrollTop;
+            const listHeight = thumbList.clientHeight;
+
+            if (thumbTop < listScrollTop) {
+                thumbList.scrollTop = thumbTop;
+            } else if (thumbTop + thumbHeight > listScrollTop + listHeight) {
+                thumbList.scrollTop = thumbTop + thumbHeight - listHeight;
+            }
+        }
+    }
 }
 
 function increaseQty() {
@@ -595,7 +616,50 @@ onMounted(loadProduct);
     }
 
     .main-image {
+        order: 1;
         min-height: 380px;
+    }
+
+    .details {
+        order: 3;
+    }
+}
+
+@media (max-width: 640px) {
+    .product-shell {
+        padding: 2rem 1rem 3rem;
+    }
+
+    .product-title {
+        font-size: 1.35rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .price-main {
+        font-size: 1.45rem;
+    }
+
+    .details {
+        padding: 1.5rem;
+    }
+
+    .main-image {
+        min-height: 320px;
+        padding: 1rem;
+    }
+
+    .buy-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .qty-control {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .buy-button {
+        width: 100%;
     }
 }
 </style>
